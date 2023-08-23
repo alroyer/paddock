@@ -52,3 +52,13 @@ class MotionData:
 class MarshalZone:
     zone_start: float
     zone_flag: int
+
+
+if __name__ == '__main__':
+    import struct
+
+    with open('./data/telemetry.bin', 'rb') as file:
+        data = file.readline()
+
+        header = Header(*struct.unpack('<HBBBBBQfIIBB', data[:29]))
+        print(header)
