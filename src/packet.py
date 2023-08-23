@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-CAR_MOTION_DATA_COUNT = 22
+import constants
 
 
 @dataclass
@@ -43,12 +43,6 @@ class CarMotionData:
 
 
 @dataclass
-class MotionData:
-    header: Header
-    car_motion_data: list[CarMotionData]
-
-
-@dataclass
 class MarshalZone:
     zone_start: float
     zone_flag: int
@@ -58,7 +52,20 @@ if __name__ == '__main__':
     import struct
 
     with open('./data/telemetry.bin', 'rb') as file:
-        data = file.readline()
+        data = file.read()
+        print(len(data))
 
         header = Header(*struct.unpack('<HBBBBBQfIIBB', data[:29]))
         print(header)
+
+        event_string_code = ''.join(
+            [chr(b) for b in struct.unpack('BBBB', data[29:33])]
+        )
+        print(event_string_code)
+
+        button_status = struct.unpack('I', data[33:37])[0]
+        print(button_status)
+
+        for bit_flag, button in constants.BUTTON_FLAGS.items():
+            if bit_flag & button_status:
+                print(button)
