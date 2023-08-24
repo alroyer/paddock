@@ -39,7 +39,6 @@ EVENT_STRING_CODE = {
     'OVTK': 'Overtake',
 }
 
-
 BUTTON_FLAGS = {
     0x00000001: 'Cross or A',
     0x00000002: 'Triangle or Y',
