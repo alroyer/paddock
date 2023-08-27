@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from typing import Union
 
+from .constants import BUTTON_FLAGS
 from .information import PacketHeader
 
 
@@ -75,4 +77,25 @@ class Overtake:
 class PacketEventData:
     header: PacketHeader
     event_string_code: str
-    event_details: FastestLap | Retirement  # TODO
+    event_details: Union[
+        FastestLap,
+        Retirement,
+        TeamMateInPits,
+        RaceWinner,
+        Penalty,
+        SpeedTrap,
+        StartLight,
+        DriveThroughPenaltyServed,
+        StopGoPenaltyServed,
+        Flashback,
+        Buttons,
+        Overtake,
+    ]
+
+
+def button_status_to_buttons(button_status: int) -> list[str]:
+    buttons = []
+    for bit_flag, button in BUTTON_FLAGS.items():
+        if bit_flag & button_status:
+            buttons.append(button)
+    return buttons

@@ -1,6 +1,6 @@
 import struct
 
-import packet.constants as constants
+from packet.event import button_status_to_buttons
 from packet.information import PacketHeader
 
 
@@ -12,17 +12,14 @@ def main():
         header = PacketHeader(*struct.unpack('<HBBBBBQfIIBB', data[:29]))
         print(header)
 
-        event_string_code = ''.join(
-            [chr(b) for b in struct.unpack('BBBB', data[29:33])]
-        )
+        event_string_code = ''.join([chr(b) for b in struct.unpack('BBBB', data[29:33])])
         print(event_string_code)
 
         button_status = struct.unpack('I', data[33:37])[0]
         print(button_status)
 
-        for bit_flag, button in constants.BUTTON_FLAGS.items():
-            if bit_flag & button_status:
-                print(button)
+        buttons = button_status_to_buttons(button_status)
+        print(buttons)
 
 
 if __name__ == '__main__':
