@@ -1,9 +1,10 @@
+import struct
+
 import packet.constants as constants
 from packet.information import PacketHeader
 
-if __name__ == '__main__':
-    import struct
 
+def main():
     with open('./data/telemetry.bin', 'rb') as file:
         data = file.read()
         print(len(data))
@@ -22,3 +23,7 @@ if __name__ == '__main__':
         for bit_flag, button in constants.BUTTON_FLAGS.items():
             if bit_flag & button_status:
                 print(button)
+
+
+if __name__ == '__main__':
+    main()
