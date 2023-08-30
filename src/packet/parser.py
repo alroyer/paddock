@@ -1,7 +1,7 @@
 from typing import Union
 
 from .event import PacketEventData
-from .information import PacketHeader
+from .header import PacketHeader
 from .lapdata import PacketLapData
 from .motion import PacketMotionData
 from .session import PacketSessionData

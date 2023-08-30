@@ -1,7 +1,7 @@
 import struct
 
 from packet.event import button_status_to_buttons
-from packet.information import PacketHeader
+from packet.header import PacketHeader
 
 
 def main():

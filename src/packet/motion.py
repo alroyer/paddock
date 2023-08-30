@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .information import PacketHeader
+from .header import PacketHeader
 
 
 @dataclass

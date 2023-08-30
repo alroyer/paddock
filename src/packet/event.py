@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Union
 
 from .constants import BUTTON_FLAGS
-from .information import PacketHeader
+from .header import PacketHeader
 
 
 @dataclass
