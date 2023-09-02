@@ -15,6 +15,7 @@ WEATHER_SAMPLES_COUNT = 56
 
 NAME_OF_PARTICIPANT_COUNT = 48
 
+# TODO enum
 PACKET_ID = {
     0: 'Motion',
     1: 'Session',

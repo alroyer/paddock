@@ -74,10 +74,22 @@ class Overtake:
 
 
 @dataclass
+class SessionStarted:
+    pass
+
+
+@dataclass
+class SessionEnded:
+    pass
+
+
+@dataclass
 class PacketEventData:
     header: PacketHeader
     event_string_code: str
     event_details: Union[
+        SessionStarted,
+        SessionEnded,
         FastestLap,
         Retirement,
         TeamMateInPits,

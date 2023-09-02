@@ -1,3 +1,6 @@
+[MAIN]
+max-line-length=120
+
 [MASTER]
 disable=
     C0114,
