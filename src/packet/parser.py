@@ -14,6 +14,10 @@ def _read(data: bytes, count: int) -> Tuple[bytes, bytes]:
 
 def _parse(data: bytes) -> Tuple[Union[PacketEventData, PacketLapData, PacketMotionData, PacketSessionData], bytes]:
     header = PacketHeader(*struct.unpack('<HBBBBBQfIIBB', data[:29]))
+
+    # TODO to be remove
+    assert header.game_year == 23 and header.packet_format == 2023
+
     packet_handler = PACKET_HANDLER[header.packet_id]
     return packet_handler(header, data[29:])
 
