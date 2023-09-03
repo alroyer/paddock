@@ -5,6 +5,7 @@ from .event import Buttons, PacketEventData, SessionEnded, SessionStarted
 from .header import PacketHeader
 from .lapdata import PacketLapData
 from .motion import PacketMotionData
+from .participant import PacketParticipantsData
 from .session import PacketSessionData
 
 
@@ -13,6 +14,7 @@ def _read(data: bytes, count: int) -> Tuple[bytes, bytes]:
 
 
 def _parse(data: bytes) -> Tuple[Union[PacketEventData, PacketLapData, PacketMotionData, PacketSessionData], bytes]:
+    # 29 bytes
     header = PacketHeader(*struct.unpack('<HBBBBBQfIIBB', data[:29]))
 
     # TODO to be remove
@@ -23,19 +25,29 @@ def _parse(data: bytes) -> Tuple[Union[PacketEventData, PacketLapData, PacketMot
 
 
 def _parse_event_data(header: PacketHeader, data: bytes) -> Tuple[PacketEventData, bytes]:
-    data, remaining_data = _read(data, 16)
-    event_string_code = ''.join([chr(b) for b in struct.unpack('BBBB', data[:4])])
+    # 45 bytes
+    data, remaining_data = _read(data, 45 - 29)
+    event_string_code = ''.join([chr(b) for b in struct.unpack('<BBBB', data[:4])])
     event_handler = EVENT_HANDLER[event_string_code]
     return event_handler(header, event_string_code, data[4:]), remaining_data
 
 
 def _parse_session_data(header: PacketHeader, data: bytes) -> Tuple[PacketSessionData, bytes]:
+    # 644 bytes
+    data, remaining_data = _read(data, 644 - 29)
     # TODO
-    pass
+    return PacketSessionData(), remaining_data
+
+
+def _parse_participants_data(header: PacketHeader, data: bytes) -> Tuple[PacketParticipantsData, bytes]:
+    # 1306 bytes
+    data, remaining_data = _read(data, 1306 - 29)
+    # TODO
+    return PacketParticipantsData(), remaining_data
 
 
 def _parse_buttons_event(header: PacketHeader, event_string_code: str, data: bytes) -> PacketEventData:
-    button_status = struct.unpack('I', data[:4])[0]
+    button_status = struct.unpack('<I', data[:4])[0]
     return PacketEventData(header, event_string_code, Buttons(button_status))
 
 
@@ -50,6 +62,7 @@ def _parse_session_ended_event(header: PacketHeader, event_string_code: str, _: 
 PACKET_HANDLER = {
     1: _parse_session_data,
     3: _parse_event_data,
+    4: _parse_participants_data,
 }
 
 EVENT_HANDLER = {
