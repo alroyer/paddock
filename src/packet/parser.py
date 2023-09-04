@@ -1,3 +1,4 @@
+import logging
 import struct
 from typing import Tuple, Union
 
@@ -8,38 +9,47 @@ from .motion import PacketMotionData
 from .participant import PacketParticipantsData
 from .session import PacketSessionData
 
+logger = logging.getLogger(__name__)
+
 
 def _read(data: bytes, count: int) -> Tuple[bytes, bytes]:
     return data[:count], data[count:]
 
 
 def _parse(data: bytes) -> Tuple[Union[PacketEventData, PacketLapData, PacketMotionData, PacketSessionData], bytes]:
-    # 29 bytes
-    header = PacketHeader(*struct.unpack('<HBBBBBQfIIBB', data[:29]))
-
-    # TODO to be remove
-    assert header.game_year == 23 and header.packet_format == 2023
-
-    packet_handler = PACKET_HANDLER[header.packet_id]
-    return packet_handler(header, data[29:])
+    bytes_count = PacketHeader.bytes_count()
+    packet_header = PacketHeader(*struct.unpack(PacketHeader.unpack_format(), data[:bytes_count]))
+    packet_handler = PACKET_DATA_HANDLER[packet_header.packet_id]
+    return packet_handler(packet_header, data[bytes_count:])
 
 
-def _parse_event_data(header: PacketHeader, data: bytes) -> Tuple[PacketEventData, bytes]:
-    # 45 bytes
-    event_data, remaining_data = _read(data, 45 - 29)
-    event_string_code = ''.join([chr(b) for b in struct.unpack('<BBBB', event_data[:4])])
+def _parse_event_data(packet_header: PacketHeader, data: bytes) -> Tuple[PacketEventData, bytes]:
+    bytes_count = PacketEventData.bytes_count()
+    event_string_bytes_count = PacketEventData.event_string_code_bytes_count()
+    event_data, remaining_data = _read(data, bytes_count)
+    event_string_code = ''.join(
+        [
+            chr(b)
+            for b in struct.unpack(
+                PacketEventData.event_string_code_unpack_format(), event_data[:event_string_bytes_count]
+            )
+        ]
+    )
     event_handler = EVENT_HANDLER[event_string_code]
-    return event_handler(header, event_string_code, event_data[4:]), remaining_data
+    return event_handler(packet_header, event_string_code, event_data[event_string_bytes_count:]), remaining_data
 
 
-def _parse_session_data(header: PacketHeader, data: bytes) -> Tuple[PacketSessionData, bytes]:
-    # 644 bytes
-    session_data, remaining_data = _read(data, 644 - 29)
+def _parse_session_data(packet_header: PacketHeader, data: bytes) -> Tuple[PacketSessionData, bytes]:
+    bytes_count = PacketSessionData.bytes_count()
+    session_data, remaining_data = _read(data, bytes_count)
     # TODO
-    return PacketSessionData(), remaining_data
+    packet_session_data = PacketSessionData(
+        packet_header, *struct.unpack(PacketSessionData.unpack_format(), session_data[:4])
+    )
+    return packet_session_data, remaining_data
 
 
-def _parse_participants_data(header: PacketHeader, data: bytes) -> Tuple[PacketParticipantsData, bytes]:
+def _parse_participants_data(packet_header: PacketHeader, data: bytes) -> Tuple[PacketParticipantsData, bytes]:
     # 1306 bytes
     participants_data, remaining_data = _read(data, 1306 - 29)
     # TODO
@@ -59,7 +69,7 @@ def _parse_session_ended_event(header: PacketHeader, event_string_code: str, _: 
     return PacketEventData(header, event_string_code, SessionEnded())
 
 
-PACKET_HANDLER = {
+PACKET_DATA_HANDLER = {
     1: _parse_session_data,
     3: _parse_event_data,
     4: _parse_participants_data,
@@ -75,7 +85,7 @@ EVENT_HANDLER = {
 def parse(data: bytes) -> list[Union[PacketEventData, PacketLapData, PacketMotionData, PacketSessionData]]:
     packets = []
     while data:
-        print(len(data))
         packet, data = _parse(data)
         packets.append(packet)
+        logger.info(packet)
     return packets
