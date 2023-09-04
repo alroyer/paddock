@@ -2,15 +2,6 @@ from dataclasses import dataclass
 
 from .header import PacketHeader
 
-WEATHER_DEFINITION = {
-    0: 'Clear',
-    1: 'Light cloud',
-    2: 'Overcast',
-    3: 'Light rain',
-    4: 'Heavy rain',
-    5: 'Storm',
-}
-
 
 @dataclass
 class MarshalZone:
@@ -97,6 +88,16 @@ class PacketSessionData:
     weather:           {_weather_to_str(self.weather)}
     track temperature: {self.track_temperature}°
     air temperature:   {self.air_temperature}°'''
+
+
+WEATHER_DEFINITION = {
+    0: 'Clear',
+    1: 'Light cloud',
+    2: 'Overcast',
+    3: 'Light rain',
+    4: 'Heavy rain',
+    5: 'Storm',
+}
 
 
 def _weather_to_str(weather: int) -> str:

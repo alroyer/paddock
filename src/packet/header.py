@@ -1,22 +1,5 @@
 from dataclasses import dataclass
 
-PACKET_ID_DEFINITION = {
-    0: 'Motion',
-    1: 'Session',
-    2: 'Lap',
-    3: 'Event',
-    4: 'Participants',
-    5: 'Car Setups',
-    6: 'Car Telemetry',
-    7: 'Car Status',
-    8: 'Final Classification',
-    9: 'Lobby Info',
-    10: 'Car Damage',
-    11: 'Session History',
-    12: 'Tyre Sets',
-    13: 'Motion Ex',
-}
-
 
 @dataclass
 class PacketHeader:
@@ -51,6 +34,24 @@ class PacketHeader:
     packet version:    {self.packet_version}
     packet id:         {_packet_id_to_str(self.packet_id)}
     session uid:       {self.session_uid}'''
+
+
+PACKET_ID_DEFINITION = {
+    0: 'Motion',
+    1: 'Session',
+    2: 'Lap',
+    3: 'Event',
+    4: 'Participants',
+    5: 'Car Setups',
+    6: 'Car Telemetry',
+    7: 'Car Status',
+    8: 'Final Classification',
+    9: 'Lobby Info',
+    10: 'Car Damage',
+    11: 'Session History',
+    12: 'Tyre Sets',
+    13: 'Motion Ex',
+}
 
 
 def _packet_id_to_str(packet_id: int) -> str:
