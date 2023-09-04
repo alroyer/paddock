@@ -44,7 +44,7 @@ def _parse_session_data(packet_header: PacketHeader, data: bytes) -> Tuple[Packe
     session_data, remaining_data = _read(data, bytes_count)
     # TODO
     packet_session_data = PacketSessionData(
-        packet_header, *struct.unpack(PacketSessionData.unpack_format(), session_data[:4])
+        packet_header, *struct.unpack(PacketSessionData.unpack_format(), session_data[:9])
     )
     return packet_session_data, remaining_data
 
