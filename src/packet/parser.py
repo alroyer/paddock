@@ -26,22 +26,22 @@ def _parse(data: bytes) -> Tuple[Union[PacketEventData, PacketLapData, PacketMot
 
 def _parse_event_data(header: PacketHeader, data: bytes) -> Tuple[PacketEventData, bytes]:
     # 45 bytes
-    data, remaining_data = _read(data, 45 - 29)
-    event_string_code = ''.join([chr(b) for b in struct.unpack('<BBBB', data[:4])])
+    event_data, remaining_data = _read(data, 45 - 29)
+    event_string_code = ''.join([chr(b) for b in struct.unpack('<BBBB', event_data[:4])])
     event_handler = EVENT_HANDLER[event_string_code]
-    return event_handler(header, event_string_code, data[4:]), remaining_data
+    return event_handler(header, event_string_code, event_data[4:]), remaining_data
 
 
 def _parse_session_data(header: PacketHeader, data: bytes) -> Tuple[PacketSessionData, bytes]:
     # 644 bytes
-    data, remaining_data = _read(data, 644 - 29)
+    session_data, remaining_data = _read(data, 644 - 29)
     # TODO
     return PacketSessionData(), remaining_data
 
 
 def _parse_participants_data(header: PacketHeader, data: bytes) -> Tuple[PacketParticipantsData, bytes]:
     # 1306 bytes
-    data, remaining_data = _read(data, 1306 - 29)
+    participants_data, remaining_data = _read(data, 1306 - 29)
     # TODO
     return PacketParticipantsData(), remaining_data
 
