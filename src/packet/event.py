@@ -68,7 +68,7 @@ class Buttons:
     def __str__(self) -> str:
         buttons = _button_status_to_buttons(self.button_status)
         return f'''[Buttons]
-    buttons:           {buttons}'''
+    buttons:                {buttons}'''
 
 
 @dataclass
@@ -125,7 +125,7 @@ class PacketEventData:
     def __str__(self) -> str:
         return f'''[PacketEventData]
     {self.header}
-    event:             {_event_string_code_to_str(self.event_string_code)}
+    event:                  {_event_string_code_to_str(self.event_string_code)}
     {self.event_details}'''
 
 

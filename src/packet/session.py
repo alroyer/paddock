@@ -8,6 +8,18 @@ class MarshalZone:
     zone_start: float
     zone_flag: int
 
+    @classmethod
+    def unpack_format(cls) -> str:
+        return '<fb'
+
+    @classmethod
+    def bytes_count(cls) -> int:
+        return 5
+
+    @classmethod
+    def bytes_offset(cls) -> int:
+        return 19
+
 
 @dataclass
 class WeatherForecastSample:
@@ -32,14 +44,14 @@ class PacketSessionData:
     session_type: int
     track_id: int
     formula: int
-    # session_time_left: int
-    # session_duration: int
-    # pit_speed_limit: int
-    # game_paused: int
-    # is_spectating: int
-    # spectator_car_index: int
-    # sli_pro_native_support: int
-    # num_marshall_zone: int
+    session_time_left: int
+    session_duration: int
+    pit_speed_limit: int
+    game_paused: int
+    is_spectating: int
+    spectator_car_index: int
+    sli_pro_native_support: int
+    num_marshall_zones: int
     # marshal_zones: list[MarshalZone]
     # safety_car_status: int
     # network_game: int
@@ -80,18 +92,27 @@ class PacketSessionData:
 
     @classmethod
     def unpack_format(cls) -> str:
-        return '<BbbBHBbB'
+        return '<BbbBHBbBHHBBBBBB'
 
     def __str__(self) -> str:
         return f'''[PacketSessionData]
     {self.header}
-    weather:           {_weather_to_str(self.weather)}
-    track temperature: {self.track_temperature}°
-    air temperature:   {self.air_temperature}°
-    track length:      {self.track_length}m
-    session type:      {_session_type_to_str(self.session_type)}
-    track:             {_track_id_to_str(self.track_id)}
-    formula:           {_formula_to_str(self.formula)}'''
+    weather:                {_weather_to_str(self.weather)}
+    track temperature:      {self.track_temperature}° celsius
+    air temperature:        {self.air_temperature}° celsius
+    track length:           {self.track_length} m
+    session type:           {_session_type_to_str(self.session_type)}
+    track:                  {_track_id_to_str(self.track_id)}
+    formula:                {_formula_to_str(self.formula)}
+    session time left:      {self.session_time_left} sec
+    session duration:       {self.session_duration} sec
+    pit speed limit:        {self.pit_speed_limit} km/h
+    game paused:            {self.game_paused}
+    is spectating:          {self.is_spectating}
+    spectator car index:    {self.spectator_car_index}
+    sli pro native support: {self.sli_pro_native_support}
+    num marshall zones:     {self.num_marshall_zones}
+    '''
 
 
 WEATHER_DEFINITION = {

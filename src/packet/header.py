@@ -28,12 +28,12 @@ class PacketHeader:
     def __str__(self) -> str:
         # TODO
         return f'''[PacketHeader]
-    packet format:     {self.packet_format}
-    game year:         {self.game_year}
-    version:           {self.game_major_version}.{self.game_minor_version}
-    packet version:    {self.packet_version}
-    packet id:         {_packet_id_to_str(self.packet_id)}
-    session uid:       {self.session_uid}'''
+    packet format:          {self.packet_format}
+    game year:              {self.game_year}
+    version:                {self.game_major_version}.{self.game_minor_version}
+    packet version:         {self.packet_version}
+    packet id:              {_packet_id_to_str(self.packet_id)}
+    session uid:            {self.session_uid}'''
 
 
 PACKET_ID_DEFINITION = {

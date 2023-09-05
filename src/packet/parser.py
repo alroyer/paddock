@@ -7,7 +7,7 @@ from .header import PacketHeader
 from .lapdata import PacketLapData
 from .motion import PacketMotionData
 from .participant import PacketParticipantsData
-from .session import PacketSessionData
+from .session import MarshalZone, PacketSessionData
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +43,16 @@ def _parse_session_data(packet_header: PacketHeader, data: bytes) -> Tuple[Packe
     bytes_count = PacketSessionData.bytes_count()
     session_data, remaining_data = _read(data, bytes_count)
     # TODO
+
+    marshal_zones = []
+    for index in range(22):
+        marshal_zone = struct.unpack(
+            MarshalZone.unpack_format(), session_data[MarshalZone.bytes_offset() + index * MarshalZone.bytes_count() :]
+        )
+        marshal_zones.append(marshal_zone)
+
     packet_session_data = PacketSessionData(
-        packet_header, *struct.unpack(PacketSessionData.unpack_format(), session_data[:9])
+        packet_header, *struct.unpack(PacketSessionData.unpack_format(), session_data[:19])
     )
     return packet_session_data, remaining_data
 
