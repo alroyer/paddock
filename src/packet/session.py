@@ -16,10 +16,6 @@ class MarshalZone:
     def bytes_count(cls) -> int:
         return 5
 
-    @classmethod
-    def bytes_offset(cls) -> int:
-        return 19
-
 
 @dataclass
 class WeatherForecastSample:
@@ -52,11 +48,9 @@ class PacketSessionData:
     spectator_car_index: int
     sli_pro_native_support: int
     num_marshall_zones: int
-    # marshal_zones: list[MarshalZone]
     # safety_car_status: int
     # network_game: int
     # num_weather_forecast_samples: int
-    # weather_forecast_samples: list[WeatherForecastSample]
     # forecast_accuracy: int
     # ai_difficulty: int
     # season_link_identifier: int
@@ -85,10 +79,16 @@ class PacketSessionData:
     # num_safety_car_periods: int
     # num_virtual_safety_car_periods: int
     # num_red_flag_periods: int
+    marshal_zones: list[MarshalZone]
+    weather_forecast_samples: list[WeatherForecastSample]
 
     @classmethod
     def bytes_count(cls) -> int:
         return 644 - PacketHeader.bytes_count()
+
+    @classmethod
+    def marshal_zone_bytes_offset(cls) -> int:
+        return 19
 
     @classmethod
     def unpack_format(cls) -> str:
