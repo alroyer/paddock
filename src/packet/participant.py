@@ -11,3 +11,8 @@ class ParticipantData:
 class PacketParticipantsData:
     # TODO
     pass
+
+    @classmethod
+    def bytes_count(cls) -> int:
+        # TODO
+        pass

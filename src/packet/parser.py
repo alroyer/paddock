@@ -2,6 +2,7 @@ import logging
 import struct
 from typing import Tuple, Union
 
+from .constants import MARSHAL_ZONE_COUNT, WEATHER_FORECAST_SAMPLE_COUNT
 from .event import Buttons, PacketEventData, SessionEnded, SessionStarted
 from .header import PacketHeader
 from .lapdata import PacketLapData
@@ -10,9 +11,6 @@ from .participant import PacketParticipantsData
 from .session import MarshalZone, PacketSessionData, WeatherForecastSample
 
 logger = logging.getLogger(__name__)
-
-MARSHAL_ZONE_COUNT = 21
-WEATHER_FORECAST_SAMPLE_COUNT = 56
 
 
 def _read(data: bytes, count: int) -> Tuple[bytes, bytes]:
@@ -66,24 +64,30 @@ def _parse_session_data(packet_header: PacketHeader, data: bytes) -> Tuple[Packe
 
 def _parse_marshal_zones(data: bytes) -> list[MarshalZone]:
     marshal_zones = []
-    for index in range(MARSHAL_ZONE_COUNT):
-        begin = PacketSessionData.marshal_zone_bytes_offset() + index * MarshalZone.bytes_count()
+    begin = PacketSessionData.marshal_zone_bytes_offset()
+    for _ in range(MARSHAL_ZONE_COUNT):
         end = begin + MarshalZone.bytes_count()
-        marshal_zone = struct.unpack(MarshalZone.unpack_format(), data[begin:end])
+        marshal_zone = MarshalZone(*struct.unpack(MarshalZone.unpack_format(), data[begin:end]))
         marshal_zones.append(marshal_zone)
+        begin += MarshalZone.bytes_count()
     return marshal_zones
 
 
 def _parse_weather_forecast_samples(data: bytes) -> list[WeatherForecastSample]:
     weather_forecast_samples = []
-    for index in range(WEATHER_FORECAST_SAMPLE_COUNT):
-        pass
+    begin = PacketSessionData.weather_forecast_samples_bytes_offset()
+    for _ in range(WEATHER_FORECAST_SAMPLE_COUNT):
+        end = begin = WeatherForecastSample.bytes_count()
+        weather_forecast_sample = WeatherForecastSample(
+            *struct.unpack(WeatherForecastSample.unpack_format(), data[begin:end])
+        )
+        weather_forecast_samples.append(weather_forecast_sample)
+        begin += WeatherForecastSample.bytes_count()
     return weather_forecast_samples
 
 
 def _parse_participants_data(packet_header: PacketHeader, data: bytes) -> Tuple[PacketParticipantsData, bytes]:
-    # 1306 bytes
-    participants_data, remaining_data = _read(data, 1306 - 29)
+    participants_data, remaining_data = _read(data, PacketParticipantsData.bytes_count())
     # TODO
     return PacketParticipantsData(), remaining_data
 

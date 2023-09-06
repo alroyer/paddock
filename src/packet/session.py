@@ -1,5 +1,12 @@
 from dataclasses import dataclass
 
+from .constants import (
+    FORMULA_DEFINITION,
+    SESSION_TYPE_DEFINITION,
+    TRACK_ID_DEFINITION,
+    WEATHER_DEFINITION,
+    ZONE_FLAG_DEFINITION,
+)
 from .header import PacketHeader
 
 
@@ -16,6 +23,11 @@ class MarshalZone:
     def bytes_count(cls) -> int:
         return 5
 
+    def __str__(self) -> str:
+        return f'''[MarshalZone]
+    zone start:             {self.zone_start}
+    zone flag:              {ZONE_FLAG_DEFINITION[self.zone_flag]}'''
+
 
 @dataclass
 class WeatherForecastSample:
@@ -27,6 +39,14 @@ class WeatherForecastSample:
     air_temperature: int
     air_temperature_change: int
     rain_percentage: int
+
+    @classmethod
+    def unpack_format(cls) -> str:
+        return '<BBBbbbbB'
+
+    @classmethod
+    def bytes_count(cls) -> int:
+        return 8
 
 
 @dataclass
@@ -91,19 +111,24 @@ class PacketSessionData:
         return 19
 
     @classmethod
+    def weather_forecast_samples_bytes_offset(cls) -> int:
+        # TODO
+        pass
+
+    @classmethod
     def unpack_format(cls) -> str:
         return '<BbbBHBbBHHBBBBBB'
 
     def __str__(self) -> str:
         return f'''[PacketSessionData]
     {self.header}
-    weather:                {_weather_to_str(self.weather)}
-    track temperature:      {self.track_temperature}° celsius
-    air temperature:        {self.air_temperature}° celsius
+    weather:                {WEATHER_DEFINITION[self.weather]}
+    track temperature:      {self.track_temperature} °C
+    air temperature:        {self.air_temperature} °C
     track length:           {self.track_length} m
-    session type:           {_session_type_to_str(self.session_type)}
-    track:                  {_track_id_to_str(self.track_id)}
-    formula:                {_formula_to_str(self.formula)}
+    session type:           {SESSION_TYPE_DEFINITION[self.session_type]}
+    track:                  {TRACK_ID_DEFINITION[self.track_id]}
+    formula:                {FORMULA_DEFINITION[self.formula]}
     session time left:      {self.session_time_left} sec
     session duration:       {self.session_duration} sec
     pit speed limit:        {self.pit_speed_limit} km/h
@@ -113,96 +138,3 @@ class PacketSessionData:
     sli pro native support: {self.sli_pro_native_support}
     num marshall zones:     {self.num_marshall_zones}
     '''
-
-
-WEATHER_DEFINITION = {
-    0: 'Clear',
-    1: 'Light cloud',
-    2: 'Overcast',
-    3: 'Light rain',
-    4: 'Heavy rain',
-    5: 'Storm',
-}
-
-
-def _weather_to_str(weather: int) -> str:
-    return WEATHER_DEFINITION[weather]
-
-
-SESSION_TYPE_DEFINITION = {
-    0: 'unknown',
-    1: 'P1',
-    2: 'P2',
-    3: 'P3',
-    4: 'short',
-    5: 'Q1',
-    6: 'Q2',
-    7: 'Q3',
-    8: 'short q',
-    9: 'OSQ',
-    10: 'R',
-    11: 'R2',
-    12: 'R3',
-    13: 'time trial',
-}
-
-
-def _session_type_to_str(session_type: int) -> str:
-    return SESSION_TYPE_DEFINITION[session_type]
-
-
-TRACK_ID_DEFINITION = {
-    0: 'Melbourne',
-    1: 'Paul Ricard',
-    2: 'Shanghai',
-    3: 'Sakhir (Bahrain)',
-    4: 'Catalunya',
-    5: 'Monaco',
-    6: 'Montreal',
-    7: 'Silverstone',
-    8: 'Hockenheim',
-    9: 'Hungaroring',
-    10: 'Spa',
-    11: 'Monza',
-    12: 'Singapore',
-    13: 'Suzuka',
-    14: 'Abu Dhabi',
-    15: 'Texas',
-    16: 'Brazil',
-    17: 'Austria',
-    18: 'Sochi',
-    19: 'Mexico',
-    20: 'Baku (Azerbaijan)',
-    21: 'Sakhir Short',
-    22: 'Silverstone Short',
-    23: 'Texas Short',
-    24: 'Suzuka Short',
-    25: 'Hanoi',
-    26: 'Zandvoort',
-    27: 'Imola',
-    28: 'Portimão',
-    29: 'Jeddah',
-    30: 'Miami',
-    31: 'Las Vegas',
-    32: 'Losail',
-}
-
-
-def _track_id_to_str(track_id: int) -> str:
-    return TRACK_ID_DEFINITION[track_id]
-
-
-FORMULA_DEFINITION = {
-    0: 'F1 modern',
-    1: 'F1 classic',
-    2: 'F2',
-    3: 'F1 generic',
-    4: 'beta',
-    5: 'supercars',
-    6: 'esports',
-    7: 'F2 2021',
-}
-
-
-def _formula_to_str(formula: int) -> str:
-    return FORMULA_DEFINITION[formula]
