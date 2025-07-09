@@ -3,3 +3,9 @@
 
 # ruff cache
 .ruff_cache/
+
+# data
+recorder/data/
+
+# MacOS
+.DS_Store
