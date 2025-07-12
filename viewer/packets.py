@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -158,7 +159,111 @@ class PacketLapData:
     time_trial_rival_car_index: int
 
 
-# TODO: EventDataDetails
+@dataclass
+class SpeedTrapEvent:
+    vehicle_index: int
+    speed: float
+    is_overall_fastest_in_session: int
+    is_driver_fastest_in_session: int
+
+
+@dataclass
+class FastestLapEvent:
+    vehicle_index: int
+    lap_time: float
+
+
+@dataclass
+class RetirementEvent:
+    vehicle_index: int
+
+
+@dataclass
+class TeamMateInPitsEvent:
+    vehicle_index: int
+
+
+@dataclass
+class RaceWinnerEvent:
+    vehicle_index: int
+
+
+@dataclass
+class PenaltyEvent:
+    penalty_type: int
+    infringement_type: int
+    vehicle_index: int
+    other_vehicle_index: int
+    time: int
+    lap_num: int
+    places_gained: int
+
+
+@dataclass
+class SpeeqTrapEvent:
+    vehicle_index: int
+    speed: float
+    is_overall_fastest_in_session: int
+    is_driver_fastest_in_session: int
+    fastest_vehicle_index_in_session: int
+    fastest_speed_in_session: float
+
+
+@dataclass
+class StartLightsEvent:
+    num_lights: int
+
+
+@dataclass
+class DriveThroughPenaltyServedEvent:
+    vehicle_index: int
+
+
+@dataclass
+class StopGoPenaltyServedEvent:
+    vehicle_index: int
+
+
+@dataclass
+class FlashbackEvent:
+    flashback_frame_identifier: int
+    flashback_session_time: int
+
+
+@dataclass
+class ButtonsEvent:
+    button_status: int
+
+
+@dataclass
+class OvertakeEvent:
+    overtaking_vehicle_index: int
+    being_overtaken_vehicle_index: int
+
+
+# TODO: hummmm
+@dataclass
+class EventDataDetails:
+    speed_trap: Optional[SpeedTrapEvent] = None
+    fastest_lap: Optional[FastestLapEvent] = None
+    retirement: Optional[RetirementEvent] = None
+    team_mate_in_pits: Optional[TeamMateInPitsEvent] = None
+    race_winner: Optional[RaceWinnerEvent] = None
+    penalty: Optional[PenaltyEvent] = None
+    speeq_trap: Optional[SpeeqTrapEvent] = None
+    start_lights: Optional[StartLightsEvent] = None
+    drive_through_penalty_served: Optional[DriveThroughPenaltyServedEvent] = None
+    stop_go_penalty_served: Optional[StopGoPenaltyServedEvent] = None
+    flashback: Optional[FlashbackEvent] = None
+    buttons: Optional[ButtonsEvent] = None
+    overtake: Optional[OvertakeEvent] = None
+
+
+@dataclass
+class PacketEventData:
+    header: PacketHeader
+    event_string_code: str
+    event_details: EventDataDetails
 
 
 @dataclass
