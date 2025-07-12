@@ -167,6 +167,13 @@ class ParticipantData:
     driver_id: int
     network_id: int
     team_id: int
+    my_team: int
+    race_number: int
+    nationality: int
+    name: str
+    your_telemetry: int
+    show_online_names: int
+    platform: int
 
 
 @dataclass
