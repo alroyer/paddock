@@ -1,0 +1,68 @@
+import math
+
+from telemetry.packet.event import EventDataDetails, PacketEventData
+from telemetry.packet.header import PacketHeader
+
+
+def _make_header():
+    return PacketHeader(
+        2025,
+        25,
+        1,
+        0,
+        1,
+        0,
+        1234567890123456789,
+        12.34,
+        100,
+        1000,
+        0,
+        255,
+    )
+
+
+def test_fastest_lap_roundtrip():
+    hdr = _make_header()
+    details = EventDataDetails.from_fastest_lap(5, 78.912)
+    pkt = PacketEventData(header=hdr, event_string_code=b"FTLP", event_details=details)
+    b = pkt.to_bytes()
+    assert len(b) == PacketEventData.SIZE
+    pkt2 = PacketEventData.from_bytes(b)
+    assert math.isclose(pkt2.header.session_time, pkt.header.session_time, rel_tol=1e-6)
+    assert pkt2.event_string_code == b"FTLP"
+    v_idx, lap = pkt2.event_details.as_fastest_lap()
+    assert v_idx == 5
+    assert math.isclose(lap, 78.912, rel_tol=1e-6)
+    assert pkt2.event_name() == "Fastest Lap"
+
+
+def test_speed_trap_roundtrip():
+    hdr = _make_header()
+    details = EventDataDetails.from_speed_trap(3, 320.5, 1, 0, 7, 322.1)
+    pkt = PacketEventData(header=hdr, event_string_code=b"SPTP", event_details=details)
+    b = pkt.to_bytes()
+    assert len(b) == PacketEventData.SIZE
+    pkt2 = PacketEventData.from_bytes(b)
+    assert pkt2.event_string_code == b"SPTP"
+    v_idx, speed, is_overall, is_driver, fastest_idx, fastest_speed = (
+        pkt2.event_details.as_speed_trap()
+    )
+    assert v_idx == 3
+    assert is_overall == 1
+    assert is_driver == 0
+    assert fastest_idx == 7
+    assert math.isclose(speed, 320.5, rel_tol=1e-6)
+    assert math.isclose(fastest_speed, 322.1, rel_tol=1e-6)
+    assert pkt2.event_name() == "Speed Trap Triggered"
+
+
+def test_flashback_roundtrip():
+    hdr = _make_header()
+    details = EventDataDetails.from_flashback(123456, 45.67)
+    pkt = PacketEventData(header=hdr, event_string_code=b"FLBK", event_details=details)
+    b = pkt.to_bytes()
+    pkt2 = PacketEventData.from_bytes(b)
+    frame, session_time = pkt2.event_details.as_flashback()
+    assert frame == 123456
+    assert math.isclose(session_time, 45.67, rel_tol=1e-6)
+    assert pkt2.event_name() == "Flashback"
