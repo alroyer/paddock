@@ -26,7 +26,6 @@ class FinalClassificationData:
     tyre_stints_visual: list[int]
     tyre_stints_end_laps: list[int]
 
-    # Format: 7B I d 3B 8B 8B 8B
     STRUCT_FMT: ClassVar[str] = _ENDIAN + "7BI d 3B 8B 8B 8B".replace(" ", "")
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
@@ -51,7 +50,6 @@ class FinalClassificationData:
             *rest,
         ) = unpacked
 
-        # rest contains 24 items: 8 actual, 8 visual, 8 end laps
         tyre_actual = list(rest[0:8])
         tyre_visual = list(rest[8:16])
         tyre_end_laps = list(rest[16:24])

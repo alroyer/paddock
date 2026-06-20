@@ -33,7 +33,6 @@ class CarDamageData:
     engine_blown: int
     engine_seized: int
 
-    # 4 floats + 30 uint8
     STRUCT_FMT: ClassVar[str] = _ENDIAN + "4f30B"
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
@@ -45,7 +44,7 @@ class CarDamageData:
         tyres_wear = list(unpacked[0:4])
         bytes_start = 4
         uints = list(unpacked[bytes_start:])
-        # split uints: 4 tyresDamage, 4 brakesDamage, 4 tyreBlisters, then 18 others
+
         tyres_damage = uints[0:4]
         brakes_damage = uints[4:8]
         tyre_blisters = uints[8:12]

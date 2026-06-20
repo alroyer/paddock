@@ -36,7 +36,6 @@ class CarStatusData:
     ers_deployed_this_lap: float
     network_paused: int
 
-    # Format assembled according to struct field order
     STRUCT_FMT: ClassVar[str] = _ENDIAN + "5B3f2H2BH3Bb3fB3fB"
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 

@@ -45,7 +45,6 @@ class ParticipantData:
     num_colours: int
     livery_colours: list[LiveryColour]
 
-    # 7 uint8, 32s, 2B, H, 2B, 12B
     STRUCT_FMT: ClassVar[str] = _ENDIAN + "7B32s2BH2B12B"
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
@@ -71,10 +70,8 @@ class ParticipantData:
             *col_bytes,
         ) = unpacked
 
-        # decode name (utf-8), strip trailing nulls
         name = name_bytes.split(b"\x00", 1)[0].decode("utf-8", errors="replace")
 
-        # col_bytes contains 12 integers for 4 colours
         livery = []
         for i in range(0, 12, 3):
             r, g, bl = col_bytes[i : i + 3]
@@ -100,12 +97,10 @@ class ParticipantData:
     def to_bytes(self) -> bytes:
         name_b = self.name.encode("utf-8")
         if len(name_b) >= 32:
-            # truncate and ensure null-termination behavior similar to C-style
             name_b = name_b[:31] + b"\x00"
         name_b = name_b.ljust(32, b"\x00")
 
         col_flat = []
-        # ensure exactly 4 colours
         cols = self.livery_colours[:4]
         while len(cols) < 4:
             cols.append(LiveryColour(0, 0, 0))

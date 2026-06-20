@@ -49,7 +49,6 @@ def test_car_telemetry_roundtrip():
 def test_packet_car_telemetry_roundtrip():
     header = _make_header()
 
-    # Create 22 car telemetry data objects
     cars = [
         CarTelemetryData(
             speed=200 + i * 5,

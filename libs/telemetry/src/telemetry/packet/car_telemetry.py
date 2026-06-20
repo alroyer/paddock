@@ -19,16 +19,10 @@ class CarTelemetryData:
     engine_rpm: int
     drs: int
     rev_lights_percent: int
-    rev_lights_bit_value: (
-        int  # Rev lights (bit 0 = leftmost LED, bit 14 = rightmost LED)
-    )
+    rev_lights_bit_value: int
     brakes_temperature: tuple[int, int, int, int]
-    tyres_surface_temperature: tuple[
-        int, int, int, int
-    ]  # Tyres surface temperature (celsius)
-    tyres_inner_temperature: tuple[
-        int, int, int, int
-    ]  # Tyres inner temperature (celsius)
+    tyres_surface_temperature: tuple[int, int, int, int]
+    tyres_inner_temperature: tuple[int, int, int, int]
     engine_temperature: int
     tyres_pressure: tuple[float, float, float, float]
     surface_type: tuple[int, int, int, int]

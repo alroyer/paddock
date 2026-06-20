@@ -34,7 +34,6 @@ class CarSetupData:
     ballast: int
     fuel_load: float
 
-    # Format: 4B 4f 9B 4f B f
     STRUCT_FMT: ClassVar[str] = _ENDIAN + "4B4f9B4fBf"
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
