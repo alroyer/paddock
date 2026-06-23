@@ -4,6 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
     "recorder",
+    "viewer",
 ]
 
 [dependency-groups]
@@ -16,8 +17,10 @@ dev = [
 [tool.uv.workspace]
 members = [
     "apps/recorder",
+    "apps/viewer",
     "libs/telemetry",
 ]
 
 [tool.uv.sources]
 recorder = { workspace = true }
+viewer = { workspace = true }
