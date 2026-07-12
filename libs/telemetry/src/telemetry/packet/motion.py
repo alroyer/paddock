@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -101,25 +102,23 @@ class CarMotionData:
 
 
 @dataclass(frozen=True)
-class PacketMotionData:
+class PacketMotionData(BasePacket):
     header: PacketHeader
     car_motion_data: list[CarMotionData]
 
     SIZE: ClassVar[int] = PacketHeader.SIZE + 22 * CarMotionData.SIZE
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketMotionData":
-        header = PacketHeader.from_bytes(b)
-        car_motion_data = []
-        offset = PacketHeader.SIZE
-        for _ in range(22):
-            cmd = CarMotionData.from_bytes(b[offset : offset + CarMotionData.SIZE])
-            car_motion_data.append(cmd)
-            offset += CarMotionData.SIZE
-        return cls(header=header, car_motion_data=car_motion_data)
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketMotionData", bytes]:
+        car_motion_data, remaining = cls._parse_items(
+            data, CarMotionData.SIZE, 22, CarMotionData.from_bytes
+        )
+        return cls(header=header, car_motion_data=car_motion_data), remaining
 
     def to_bytes(self) -> bytes:
-        b = self.header.to_bytes()
+        data = self.header.to_bytes()
         for cmd in self.car_motion_data:
-            b += cmd.to_bytes()
-        return b
+            data += cmd.to_bytes()
+        return data

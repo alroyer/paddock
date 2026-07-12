@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -79,7 +80,7 @@ class WeatherForecastSample:
 
 
 @dataclass(frozen=True)
-class PacketSessionData:
+class PacketSessionData(BasePacket):
     header: PacketHeader
     weather: int
     track_temperature: int
@@ -182,12 +183,19 @@ class PacketSessionData:
     )
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketSessionData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketSessionData", bytes]:
+        data = cls._require_bytes(
+            data,
+            cls.PRE_SIZE
+            + 21 * MarshalZone.SIZE
+            + cls.MID_SIZE
+            + 64 * WeatherForecastSample.SIZE
+            + cls.TAIL_SIZE,
+        )
 
-        header = PacketHeader.from_bytes(b)
-        offset = PacketHeader.SIZE
+        offset = 0
 
         (
             weather,
@@ -206,12 +214,12 @@ class PacketSessionData:
             spectator_car_index,
             sli_pro_native_support,
             num_marshal_zones,
-        ) = struct.unpack(cls.PRE_FMT, b[offset : offset + cls.PRE_SIZE])
+        ) = struct.unpack(cls.PRE_FMT, data[offset : offset + cls.PRE_SIZE])
         offset += cls.PRE_SIZE
 
         marshal_zones = []
         for _ in range(21):
-            zone = MarshalZone.from_bytes(b[offset : offset + MarshalZone.SIZE])
+            zone = MarshalZone.from_bytes(data[offset : offset + MarshalZone.SIZE])
             marshal_zones.append(zone)
             offset += MarshalZone.SIZE
 
@@ -219,13 +227,13 @@ class PacketSessionData:
             safety_car_status,
             network_game,
             num_weather_forecast_samples,
-        ) = struct.unpack(cls.MID_FMT, b[offset : offset + cls.MID_SIZE])
+        ) = struct.unpack(cls.MID_FMT, data[offset : offset + cls.MID_SIZE])
         offset += cls.MID_SIZE
 
         weather_forecast_samples = []
         for _ in range(64):
             sample = WeatherForecastSample.from_bytes(
-                b[offset : offset + WeatherForecastSample.SIZE]
+                data[offset : offset + WeatherForecastSample.SIZE]
             )
             weather_forecast_samples.append(sample)
             offset += WeatherForecastSample.SIZE
@@ -287,7 +295,7 @@ class PacketSessionData:
             *weekend_structure,
             sector2_lap_distance_start,
             sector3_lap_distance_start,
-        ) = struct.unpack(cls.TAIL_FMT, b[offset : offset + cls.TAIL_SIZE])
+        ) = struct.unpack(cls.TAIL_FMT, data[offset : offset + cls.TAIL_SIZE])
 
         return cls(
             header=header,

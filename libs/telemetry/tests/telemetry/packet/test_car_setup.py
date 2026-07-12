@@ -82,10 +82,14 @@ def test_packet_car_setup_roundtrip():
         ballast=2,
         fuel_load=34.5,
     )
-    pkt = PacketCarSetupData(header=hdr, car_setups=[one] * 22, next_front_wing_value=2.5)
+    pkt = PacketCarSetupData(
+        header=hdr, car_setups=[one] * 22, next_front_wing_value=2.5
+    )
     b = pkt.to_bytes()
     assert len(b) == PacketCarSetupData.SIZE
-    pkt2 = PacketCarSetupData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketCarSetupData.parse(header, remaining)
+    assert remaining == b""
     assert math.isclose(pkt2.next_front_wing_value, 2.5, rel_tol=1e-6)
     assert len(pkt2.car_setups) == 22
     assert pkt2.car_setups[0].rear_wing == 2

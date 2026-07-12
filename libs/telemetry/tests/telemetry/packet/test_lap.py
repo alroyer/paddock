@@ -157,7 +157,9 @@ def test_packet_lap_data_roundtrip():
 
     b = packet.to_bytes()
     assert len(b) == PacketLapData.SIZE
-    decoded = PacketLapData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    decoded, remaining = PacketLapData.parse(header, remaining)
+    assert remaining == b""
 
     assert math.isclose(
         decoded.header.session_time,

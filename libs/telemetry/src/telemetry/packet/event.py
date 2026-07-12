@@ -21,10 +21,12 @@ class EventDataDetails:
     SIZE: ClassVar[int] = 32
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "EventDataDetails":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        return cls(raw=b[: cls.SIZE])
+    def from_bytes(cls, data: bytes) -> "EventDataDetails":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
+        return cls(raw=data[: cls.SIZE])
 
     def to_bytes(self) -> bytes:
         return self.raw.ljust(self.SIZE, b"\x00")
@@ -107,34 +109,29 @@ class PacketEventData(BasePacket):
     SIZE: ClassVar[int] = PacketHeader.SIZE + 4 + EventDataDetails.SIZE
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> BasePacket:
-        if len(data) < cls.SIZE:
-            raise ValueError(
-                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
-            )
-        header = PacketHeader.from_bytes(data)
-        offset = PacketHeader.SIZE
-        event_string_code = data[offset : offset + 4]
-        offset += 4
-        event_details = EventDataDetails.from_bytes(
-            data[offset : offset + EventDataDetails.SIZE]
-        )
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketEventData", bytes]:
+        payload = cls._require_bytes(data, EventDataDetails.SIZE + 4)
+        event_string_code, payload = cls._take_bytes(payload, 4)
+        event_details_bytes, remaining = cls._take_bytes(payload, EventDataDetails.SIZE)
+        event_details = EventDataDetails.from_bytes(event_details_bytes)
         return cls(
             header=header,
             event_string_code=event_string_code,
             event_details=event_details,
-        )
+        ), remaining
 
     def to_bytes(self) -> bytes:
-        b = self.header.to_bytes()
+        data = self.header.to_bytes()
         code = self.event_string_code
         if isinstance(code, str):
             code = code.encode("ascii")
         if len(code) != 4:
             raise ValueError("event_string_code must be 4 bytes")
-        b += code
-        b += self.event_details.to_bytes()
-        return b
+        data += code
+        data += self.event_details.to_bytes()
+        return data
 
     def event_name(self) -> str:
         raw_code = self.event_string_code

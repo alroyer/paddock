@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -93,7 +94,7 @@ class TyreStintHistoryData:
 
 
 @dataclass(frozen=True)
-class PacketSessionHistoryData:
+class PacketSessionHistoryData(BasePacket):
     header: PacketHeader
     car_idx: int
     num_laps: int
@@ -113,11 +114,13 @@ class PacketSessionHistoryData:
     )
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketSessionHistoryData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        header = PacketHeader.from_bytes(b)
-        offset = PacketHeader.SIZE
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketSessionHistoryData", bytes]:
+        data = cls._require_bytes(
+            data, 7 + 100 * LapHistoryData.SIZE + 8 * TyreStintHistoryData.SIZE
+        )
+        offset = 0
         (
             car_idx,
             num_laps,
@@ -126,19 +129,19 @@ class PacketSessionHistoryData:
             best_sector1_lap_num,
             best_sector2_lap_num,
             best_sector3_lap_num,
-        ) = struct.unpack(_ENDIAN + "7B", b[offset : offset + 7])
+        ) = struct.unpack(_ENDIAN + "7B", data[offset : offset + 7])
         offset += 7
 
         lap_history = []
         for _ in range(100):
-            lh = LapHistoryData.from_bytes(b[offset : offset + LapHistoryData.SIZE])
+            lh = LapHistoryData.from_bytes(data[offset : offset + LapHistoryData.SIZE])
             lap_history.append(lh)
             offset += LapHistoryData.SIZE
 
         tyre_history = []
         for _ in range(8):
             th = TyreStintHistoryData.from_bytes(
-                b[offset : offset + TyreStintHistoryData.SIZE]
+                data[offset : offset + TyreStintHistoryData.SIZE]
             )
             tyre_history.append(th)
             offset += TyreStintHistoryData.SIZE
@@ -154,7 +157,7 @@ class PacketSessionHistoryData:
             best_sector3_lap_num=best_sector3_lap_num,
             lap_history_data=lap_history,
             tyre_stints_history_data=tyre_history,
-        )
+        ), data[offset:]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()

@@ -56,7 +56,9 @@ def test_packet_lobby_roundtrip():
     pkt = PacketLobbyInfoData(header=hdr, num_players=10, lobby_players=[one] * 22)
     b = pkt.to_bytes()
     assert len(b) == PacketLobbyInfoData.SIZE
-    pkt2 = PacketLobbyInfoData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketLobbyInfoData.parse(header, remaining)
+    assert remaining == b""
     assert pkt2.num_players == 10
     assert len(pkt2.lobby_players) == 22
     assert pkt2.lobby_players[0].car_number == one.car_number

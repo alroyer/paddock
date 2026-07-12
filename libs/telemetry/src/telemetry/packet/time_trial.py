@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -78,7 +79,7 @@ class TimeTrialDataSet:
 
 
 @dataclass(frozen=True)
-class PacketTimeTrialData:
+class PacketTimeTrialData(BasePacket):
     header: PacketHeader
     player_session_best_data_set: TimeTrialDataSet
     personal_best_data_set: TimeTrialDataSet
@@ -87,22 +88,22 @@ class PacketTimeTrialData:
     SIZE: ClassVar[int] = PacketHeader.SIZE + TimeTrialDataSet.SIZE * 3
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketTimeTrialData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketTimeTrialData", bytes]:
+        data = cls._require_bytes(data, TimeTrialDataSet.SIZE * 3)
 
-        header = PacketHeader.from_bytes(b[: PacketHeader.SIZE])
-        offset = PacketHeader.SIZE
+        offset = 0
         player_session_best_data_set = TimeTrialDataSet.from_bytes(
-            b[offset : offset + TimeTrialDataSet.SIZE]
+            data[offset : offset + TimeTrialDataSet.SIZE]
         )
         offset += TimeTrialDataSet.SIZE
         personal_best_data_set = TimeTrialDataSet.from_bytes(
-            b[offset : offset + TimeTrialDataSet.SIZE]
+            data[offset : offset + TimeTrialDataSet.SIZE]
         )
         offset += TimeTrialDataSet.SIZE
         rival_data_set = TimeTrialDataSet.from_bytes(
-            b[offset : offset + TimeTrialDataSet.SIZE]
+            data[offset : offset + TimeTrialDataSet.SIZE]
         )
 
         return cls(
@@ -110,7 +111,7 @@ class PacketTimeTrialData:
             player_session_best_data_set=player_session_best_data_set,
             personal_best_data_set=personal_best_data_set,
             rival_data_set=rival_data_set,
-        )
+        ), data[offset + TimeTrialDataSet.SIZE :]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()

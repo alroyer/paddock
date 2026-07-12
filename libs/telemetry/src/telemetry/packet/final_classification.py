@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -105,7 +106,7 @@ class FinalClassificationData:
 
 
 @dataclass(frozen=True)
-class PacketFinalClassificationData:
+class PacketFinalClassificationData(BasePacket):
     header: PacketHeader
     num_cars: int
     classification_data: list[FinalClassificationData]
@@ -113,21 +114,23 @@ class PacketFinalClassificationData:
     SIZE: ClassVar[int] = PacketHeader.SIZE + 1 + 22 * FinalClassificationData.SIZE
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketFinalClassificationData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        header = PacketHeader.from_bytes(b)
-        offset = PacketHeader.SIZE
-        num_cars = struct.unpack(_ENDIAN + "B", b[offset : offset + 1])[0]
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketFinalClassificationData", bytes]:
+        data = cls._require_bytes(data, 1 + 22 * FinalClassificationData.SIZE)
+        offset = 0
+        num_cars = struct.unpack(_ENDIAN + "B", data[offset : offset + 1])[0]
         offset += 1
         arr = []
         for _ in range(22):
             fc = FinalClassificationData.from_bytes(
-                b[offset : offset + FinalClassificationData.SIZE]
+                data[offset : offset + FinalClassificationData.SIZE]
             )
             arr.append(fc)
             offset += FinalClassificationData.SIZE
-        return cls(header=header, num_cars=num_cars, classification_data=arr)
+        return cls(header=header, num_cars=num_cars, classification_data=arr), data[
+            offset:
+        ]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()

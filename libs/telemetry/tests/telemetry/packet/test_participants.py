@@ -81,7 +81,9 @@ def test_packet_participants_roundtrip():
     )
     b = pkt.to_bytes()
     assert len(b) == PacketParticipantsData.SIZE
-    pkt2 = PacketParticipantsData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketParticipantsData.parse(header, remaining)
+    assert remaining == b""
     assert pkt2.num_active_cars == 22
     assert len(pkt2.participants) == 22
     assert pkt2.participants[0].name.startswith("Driver X")

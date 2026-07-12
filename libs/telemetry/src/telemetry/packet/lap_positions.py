@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -12,7 +13,7 @@ MAX_CARS = 22
 
 
 @dataclass(frozen=True)
-class PacketLapPositionsData:
+class PacketLapPositionsData(BasePacket):
     header: PacketHeader
     num_laps: int
     lap_start: int
@@ -21,18 +22,18 @@ class PacketLapPositionsData:
     SIZE: ClassVar[int] = PacketHeader.SIZE + 2 + MAX_LAPS * MAX_CARS
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketLapPositionsData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketLapPositionsData", bytes]:
+        data = cls._require_bytes(data, 2 + MAX_LAPS * MAX_CARS)
 
-        header = PacketHeader.from_bytes(b[: PacketHeader.SIZE])
-        offset = PacketHeader.SIZE
-        num_laps, lap_start = struct.unpack_from(_ENDIAN + "2B", b, offset)
+        offset = 0
+        num_laps, lap_start = struct.unpack_from(_ENDIAN + "2B", data, offset)
         offset += 2
 
         rows = []
         for _ in range(MAX_LAPS):
-            row = struct.unpack_from(_ENDIAN + f"{MAX_CARS}B", b, offset)
+            row = struct.unpack_from(_ENDIAN + f"{MAX_CARS}B", data, offset)
             rows.append(row)
             offset += MAX_CARS
 
@@ -41,7 +42,7 @@ class PacketLapPositionsData:
             num_laps=num_laps,
             lap_start=lap_start,
             position_for_vehicle_idx=tuple(rows),
-        )
+        ), data[offset:]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()

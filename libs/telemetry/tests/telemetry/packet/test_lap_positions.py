@@ -32,7 +32,9 @@ def test_packet_lap_positions_roundtrip():
     b = data.to_bytes()
     assert len(b) == PacketLapPositionsData.SIZE
 
-    decoded = PacketLapPositionsData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    decoded, remaining = PacketLapPositionsData.parse(header, remaining)
+    assert remaining == b""
     assert decoded.num_laps == 3
     assert decoded.lap_start == 0
     assert decoded.position_for_vehicle_idx[0][0] == 1

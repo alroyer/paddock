@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -135,7 +136,7 @@ class CarTelemetryData:
 
 
 @dataclass(frozen=True)
-class PacketCarTelemetryData:
+class PacketCarTelemetryData(BasePacket):
     header: PacketHeader
     car_telemetry_data: tuple[CarTelemetryData, ...]
     mfd_panel_index: int
@@ -145,23 +146,22 @@ class PacketCarTelemetryData:
     SIZE: ClassVar[int] = PacketHeader.SIZE + CarTelemetryData.SIZE * 22 + 3
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketCarTelemetryData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-
-        header = PacketHeader.from_bytes(b[: PacketHeader.SIZE])
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketCarTelemetryData", bytes]:
+        data = cls._require_bytes(data, CarTelemetryData.SIZE * 22 + 3)
 
         car_telemetry_data = []
-        offset = PacketHeader.SIZE
-        for i in range(22):
+        offset = 0
+        for _ in range(22):
             car_data = CarTelemetryData.from_bytes(
-                b[offset : offset + CarTelemetryData.SIZE]
+                data[offset : offset + CarTelemetryData.SIZE]
             )
             car_telemetry_data.append(car_data)
             offset += CarTelemetryData.SIZE
 
         (mfd_panel_index, mfd_panel_index_secondary_player, suggested_gear) = (
-            struct.unpack_from(_ENDIAN + "3B", b[offset : offset + 3])
+            struct.unpack_from(_ENDIAN + "3B", data[offset : offset + 3])
         )
 
         return cls(
@@ -170,7 +170,7 @@ class PacketCarTelemetryData:
             mfd_panel_index=mfd_panel_index,
             mfd_panel_index_secondary_player=mfd_panel_index_secondary_player,
             suggested_gear=suggested_gear,
-        )
+        ), data[offset + 3 :]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()

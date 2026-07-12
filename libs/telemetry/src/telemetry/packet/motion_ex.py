@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -9,7 +10,7 @@ _ENDIAN = "<" if BYTES_ORDER == "little" else ">"
 
 
 @dataclass(frozen=True)
-class PacketMotionExData:
+class PacketMotionExData(BasePacket):
     header: PacketHeader
     suspension_position: tuple[float, float, float, float]
     suspension_velocity: tuple[float, float, float, float]
@@ -44,14 +45,15 @@ class PacketMotionExData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketMotionExData":
-        if len(b) < cls.SIZE + PacketHeader.SIZE:
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketMotionExData", bytes]:
+        if len(data) < cls.SIZE:
             raise ValueError(
-                f"buffer too small: need {cls.SIZE + PacketHeader.SIZE} bytes, got {len(b)}"
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
             )
 
-        header = PacketHeader.from_bytes(b[: PacketHeader.SIZE])
-        values = struct.unpack_from(cls.STRUCT_FMT, b, PacketHeader.SIZE)
+        values = struct.unpack_from(cls.STRUCT_FMT, data)
 
         return cls(
             header=header,
@@ -83,7 +85,7 @@ class PacketMotionExData:
             chassis_pitch=values[52],
             wheel_camber=tuple(values[53:57]),
             wheel_camber_gain=tuple(values[57:61]),
-        )
+        ), data[cls.SIZE :]
 
     def to_bytes(self) -> bytes:
         values = [

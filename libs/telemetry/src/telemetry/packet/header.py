@@ -26,9 +26,11 @@ class PacketHeader:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketHeader":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def parse(cls, data: bytes) -> tuple["PacketHeader", bytes]:
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             packet_format,
             game_year,
@@ -42,9 +44,9 @@ class PacketHeader:
             overall_frame_identifier,
             player_car_index,
             secondary_player_car_index,
-        ) = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+        ) = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
 
-        return cls(
+        header = cls(
             packet_format=packet_format,
             game_year=game_year,
             game_major_version=game_major_version,
@@ -58,6 +60,7 @@ class PacketHeader:
             player_car_index=player_car_index,
             secondary_player_car_index=secondary_player_car_index,
         )
+        return header, data[cls.SIZE :]
 
     def to_bytes(self) -> bytes:
         return struct.pack(

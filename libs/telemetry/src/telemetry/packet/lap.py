@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -164,7 +165,7 @@ class LapData:
 
 
 @dataclass(frozen=True)
-class PacketLapData:
+class PacketLapData(BasePacket):
     header: PacketHeader
     lap_data: list[LapData]
     time_trial_pb_car_idx: int
@@ -173,26 +174,24 @@ class PacketLapData:
     SIZE: ClassVar[int] = PacketHeader.SIZE + 22 * LapData.SIZE + 2
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketLapData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        header = PacketHeader.from_bytes(b)
-        offset = PacketHeader.SIZE
+    def parse(cls, header: PacketHeader, data: bytes) -> tuple["PacketLapData", bytes]:
+        data = cls._require_bytes(data, 22 * LapData.SIZE + 2)
+        offset = 0
         lap_data = []
         for _ in range(22):
-            lap = LapData.from_bytes(b[offset : offset + LapData.SIZE])
+            lap = LapData.from_bytes(data[offset : offset + LapData.SIZE])
             lap_data.append(lap)
             offset += LapData.SIZE
         time_trial_pb_car_idx, time_trial_rival_car_idx = struct.unpack(
             "<BB" if BYTES_ORDER == "little" else ">BB",
-            b[offset : offset + 2],
+            data[offset : offset + 2],
         )
         return cls(
             header=header,
             lap_data=lap_data,
             time_trial_pb_car_idx=time_trial_pb_car_idx,
             time_trial_rival_car_idx=time_trial_rival_car_idx,
-        )
+        ), data[offset + 2 :]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()

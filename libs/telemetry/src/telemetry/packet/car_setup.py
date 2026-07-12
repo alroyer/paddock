@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -124,7 +125,7 @@ class CarSetupData:
 
 
 @dataclass(frozen=True)
-class PacketCarSetupData:
+class PacketCarSetupData(BasePacket):
     header: PacketHeader
     car_setups: list[CarSetupData]
     next_front_wing_value: float
@@ -132,23 +133,25 @@ class PacketCarSetupData:
     SIZE: ClassVar[int] = PacketHeader.SIZE + 22 * CarSetupData.SIZE + 4
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketCarSetupData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        header = PacketHeader.from_bytes(b)
-        offset = PacketHeader.SIZE
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketCarSetupData", bytes]:
+        data = cls._require_bytes(data, 22 * CarSetupData.SIZE + 4)
+        offset = 0
         car_setups = []
         for _ in range(22):
-            cs = CarSetupData.from_bytes(b[offset : offset + CarSetupData.SIZE])
+            cs = CarSetupData.from_bytes(data[offset : offset + CarSetupData.SIZE])
             car_setups.append(cs)
             offset += CarSetupData.SIZE
 
-        next_front_wing_value = struct.unpack(_ENDIAN + "f", b[offset : offset + 4])[0]
+        next_front_wing_value = struct.unpack(_ENDIAN + "f", data[offset : offset + 4])[
+            0
+        ]
         return cls(
             header=header,
             car_setups=car_setups,
             next_front_wing_value=next_front_wing_value,
-        )
+        ), data[offset + 4 :]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()

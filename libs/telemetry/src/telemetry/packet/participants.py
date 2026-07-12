@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -128,7 +129,7 @@ class ParticipantData:
 
 
 @dataclass(frozen=True)
-class PacketParticipantsData:
+class PacketParticipantsData(BasePacket):
     header: PacketHeader
     num_active_cars: int
     participants: list[ParticipantData]
@@ -136,19 +137,23 @@ class PacketParticipantsData:
     SIZE: ClassVar[int] = PacketHeader.SIZE + 1 + 22 * ParticipantData.SIZE
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketParticipantsData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        header = PacketHeader.from_bytes(b)
-        offset = PacketHeader.SIZE
-        num_active = struct.unpack(_ENDIAN + "B", b[offset : offset + 1])[0]
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketParticipantsData", bytes]:
+        data = cls._require_bytes(data, 1 + 22 * ParticipantData.SIZE)
+        offset = 0
+        num_active = struct.unpack(_ENDIAN + "B", data[offset : offset + 1])[0]
         offset += 1
         parts = []
         for _ in range(22):
-            pd = ParticipantData.from_bytes(b[offset : offset + ParticipantData.SIZE])
+            pd = ParticipantData.from_bytes(
+                data[offset : offset + ParticipantData.SIZE]
+            )
             parts.append(pd)
             offset += ParticipantData.SIZE
-        return cls(header=header, num_active_cars=num_active, participants=parts)
+        return cls(header=header, num_active_cars=num_active, participants=parts), data[
+            offset:
+        ]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()

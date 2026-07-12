@@ -89,6 +89,8 @@ def test_packet_car_status_roundtrip():
     pkt = PacketCarStatusData(header=hdr, car_status_data=[one] * 22)
     b = pkt.to_bytes()
     assert len(b) == PacketCarStatusData.SIZE
-    pkt2 = PacketCarStatusData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketCarStatusData.parse(header, remaining)
+    assert remaining == b""
     assert len(pkt2.car_status_data) == 22
     assert pkt2.car_status_data[0].max_gears == one.max_gears

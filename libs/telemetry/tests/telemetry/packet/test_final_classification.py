@@ -74,7 +74,9 @@ def test_packet_final_classification_roundtrip():
     )
     b = pkt.to_bytes()
     assert len(b) == PacketFinalClassificationData.SIZE
-    pkt2 = PacketFinalClassificationData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketFinalClassificationData.parse(header, remaining)
+    assert remaining == b""
     assert pkt2.num_cars == 22
     assert len(pkt2.classification_data) == 22
     assert pkt2.classification_data[0].points == one.points

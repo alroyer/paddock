@@ -55,7 +55,9 @@ def test_packet_motion_ex_roundtrip():
     b = packet.to_bytes()
     assert len(b) == PacketMotionExData.SIZE + PacketHeader.SIZE
 
-    packet2 = PacketMotionExData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    packet2, remaining = PacketMotionExData.parse(header, remaining)
+    assert remaining == b""
     assert packet2.header.packet_format == packet.header.packet_format
     assert packet2.suspension_position[0] == 1.0
     assert packet2.wheel_camber_gain[3] == 61.0

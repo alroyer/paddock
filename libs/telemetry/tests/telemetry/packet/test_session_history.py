@@ -68,6 +68,8 @@ def test_packet_session_history_roundtrip():
     )
     b = pkt.to_bytes()
     assert len(b) == PacketSessionHistoryData.SIZE
-    pkt2 = PacketSessionHistoryData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketSessionHistoryData.parse(header, remaining)
+    assert remaining == b""
     assert pkt2.car_idx == 1
     assert len(pkt2.lap_history_data) == 100

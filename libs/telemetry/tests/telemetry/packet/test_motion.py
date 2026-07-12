@@ -1,7 +1,7 @@
 import math
 
-from telemetry.packet.motion import CarMotionData, PacketMotionData
 from telemetry.packet.header import PacketHeader
+from telemetry.packet.motion import CarMotionData, PacketMotionData
 
 
 def test_car_motion_data_roundtrip():
@@ -105,8 +105,15 @@ def test_packet_motion_data_roundtrip():
     b = packet.to_bytes()
     assert len(b) == PacketMotionData.SIZE
 
-    packet2 = PacketMotionData.from_bytes(b)
-    assert math.isclose(packet2.header.session_time, packet.header.session_time, rel_tol=1e-6, abs_tol=1e-6)
+    header, remaining = PacketHeader.parse(b)
+    packet2, remaining = PacketMotionData.parse(header, remaining)
+    assert remaining == b""
+    assert math.isclose(
+        packet2.header.session_time,
+        packet.header.session_time,
+        rel_tol=1e-6,
+        abs_tol=1e-6,
+    )
     assert (
         packet2.header.packet_format,
         packet2.header.game_year,
@@ -134,12 +141,42 @@ def test_packet_motion_data_roundtrip():
     )
     assert len(packet2.car_motion_data) == 22
     for original, decoded in zip(packet.car_motion_data, packet2.car_motion_data):
-        assert math.isclose(original.world_position_x, decoded.world_position_x, rel_tol=1e-6, abs_tol=1e-6)
-        assert math.isclose(original.world_position_y, decoded.world_position_y, rel_tol=1e-6, abs_tol=1e-6)
-        assert math.isclose(original.world_position_z, decoded.world_position_z, rel_tol=1e-6, abs_tol=1e-6)
-        assert math.isclose(original.world_velocity_x, decoded.world_velocity_x, rel_tol=1e-6, abs_tol=1e-6)
-        assert math.isclose(original.world_velocity_y, decoded.world_velocity_y, rel_tol=1e-6, abs_tol=1e-6)
-        assert math.isclose(original.world_velocity_z, decoded.world_velocity_z, rel_tol=1e-6, abs_tol=1e-6)
+        assert math.isclose(
+            original.world_position_x,
+            decoded.world_position_x,
+            rel_tol=1e-6,
+            abs_tol=1e-6,
+        )
+        assert math.isclose(
+            original.world_position_y,
+            decoded.world_position_y,
+            rel_tol=1e-6,
+            abs_tol=1e-6,
+        )
+        assert math.isclose(
+            original.world_position_z,
+            decoded.world_position_z,
+            rel_tol=1e-6,
+            abs_tol=1e-6,
+        )
+        assert math.isclose(
+            original.world_velocity_x,
+            decoded.world_velocity_x,
+            rel_tol=1e-6,
+            abs_tol=1e-6,
+        )
+        assert math.isclose(
+            original.world_velocity_y,
+            decoded.world_velocity_y,
+            rel_tol=1e-6,
+            abs_tol=1e-6,
+        )
+        assert math.isclose(
+            original.world_velocity_z,
+            decoded.world_velocity_z,
+            rel_tol=1e-6,
+            abs_tol=1e-6,
+        )
         assert (
             original.world_forward_dir_x,
             original.world_forward_dir_y,
@@ -155,9 +192,24 @@ def test_packet_motion_data_roundtrip():
             decoded.world_right_dir_y,
             decoded.world_right_dir_z,
         )
-        assert math.isclose(original.g_force_lateral, decoded.g_force_lateral, rel_tol=1e-6, abs_tol=1e-6)
-        assert math.isclose(original.g_force_longitudinal, decoded.g_force_longitudinal, rel_tol=1e-6, abs_tol=1e-6)
-        assert math.isclose(original.g_force_vertical, decoded.g_force_vertical, rel_tol=1e-6, abs_tol=1e-6)
+        assert math.isclose(
+            original.g_force_lateral,
+            decoded.g_force_lateral,
+            rel_tol=1e-6,
+            abs_tol=1e-6,
+        )
+        assert math.isclose(
+            original.g_force_longitudinal,
+            decoded.g_force_longitudinal,
+            rel_tol=1e-6,
+            abs_tol=1e-6,
+        )
+        assert math.isclose(
+            original.g_force_vertical,
+            decoded.g_force_vertical,
+            rel_tol=1e-6,
+            abs_tol=1e-6,
+        )
         assert math.isclose(original.yaw, decoded.yaw, rel_tol=1e-6, abs_tol=1e-6)
         assert math.isclose(original.pitch, decoded.pitch, rel_tol=1e-6, abs_tol=1e-6)
         assert math.isclose(original.roll, decoded.roll, rel_tol=1e-6, abs_tol=1e-6)

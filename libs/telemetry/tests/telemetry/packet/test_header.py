@@ -20,7 +20,8 @@ def test_packet_header_roundtrip():
     )
     b = hdr.to_bytes()
     assert len(b) == PacketHeader.SIZE
-    hdr2 = PacketHeader.from_bytes(b)
+    hdr2, remaining = PacketHeader.parse(b)
+    assert remaining == b""
     assert math.isclose(hdr.session_time, hdr2.session_time, rel_tol=1e-6, abs_tol=1e-6)
     assert (
         hdr.packet_format,

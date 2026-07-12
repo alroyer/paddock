@@ -82,7 +82,9 @@ def test_packet_car_telemetry_roundtrip():
     b = pct.to_bytes()
     assert len(b) == PacketCarTelemetryData.SIZE
 
-    pct2 = PacketCarTelemetryData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pct2, remaining = PacketCarTelemetryData.parse(header, remaining)
+    assert remaining == b""
     assert pct2.header.packet_format == header.packet_format
     assert len(pct2.car_telemetry_data) == 22
     assert pct2.car_telemetry_data[0].speed == cars[0].speed

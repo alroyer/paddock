@@ -65,7 +65,9 @@ def test_packet_time_trial_data_roundtrip():
     )
     b = packet.to_bytes()
     assert len(b) == PacketTimeTrialData.SIZE
-    packet2 = PacketTimeTrialData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    packet2, remaining = PacketTimeTrialData.parse(header, remaining)
+    assert remaining == b""
     assert packet2.header.packet_format == header.packet_format
     assert packet2.player_session_best_data_set.team_id == data_set.team_id
     assert packet2.personal_best_data_set.valid == data_set.valid

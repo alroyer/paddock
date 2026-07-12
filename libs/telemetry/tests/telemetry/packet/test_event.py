@@ -27,7 +27,9 @@ def test_fastest_lap_roundtrip():
     pkt = PacketEventData(header=hdr, event_string_code=b"FTLP", event_details=details)
     b = pkt.to_bytes()
     assert len(b) == PacketEventData.SIZE
-    pkt2 = PacketEventData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketEventData.parse(header, remaining)
+    assert remaining == b""
     assert math.isclose(pkt2.header.session_time, pkt.header.session_time, rel_tol=1e-6)
     assert pkt2.event_string_code == b"FTLP"
     v_idx, lap = pkt2.event_details.as_fastest_lap()
@@ -42,7 +44,9 @@ def test_speed_trap_roundtrip():
     pkt = PacketEventData(header=hdr, event_string_code=b"SPTP", event_details=details)
     b = pkt.to_bytes()
     assert len(b) == PacketEventData.SIZE
-    pkt2 = PacketEventData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketEventData.parse(header, remaining)
+    assert remaining == b""
     assert pkt2.event_string_code == b"SPTP"
     v_idx, speed, is_overall, is_driver, fastest_idx, fastest_speed = (
         pkt2.event_details.as_speed_trap()
@@ -61,7 +65,9 @@ def test_flashback_roundtrip():
     details = EventDataDetails.from_flashback(123456, 45.67)
     pkt = PacketEventData(header=hdr, event_string_code=b"FLBK", event_details=details)
     b = pkt.to_bytes()
-    pkt2 = PacketEventData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketEventData.parse(header, remaining)
+    assert remaining == b""
     frame, session_time = pkt2.event_details.as_flashback()
     assert frame == 123456
     assert math.isclose(session_time, 45.67, rel_tol=1e-6)

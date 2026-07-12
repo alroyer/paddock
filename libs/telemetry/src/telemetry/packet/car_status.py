@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -131,24 +132,24 @@ class CarStatusData:
 
 
 @dataclass(frozen=True)
-class PacketCarStatusData:
+class PacketCarStatusData(BasePacket):
     header: PacketHeader
     car_status_data: list[CarStatusData]
 
     SIZE: ClassVar[int] = PacketHeader.SIZE + 22 * CarStatusData.SIZE
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketCarStatusData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        header = PacketHeader.from_bytes(b)
-        offset = PacketHeader.SIZE
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketCarStatusData", bytes]:
+        data = cls._require_bytes(data, 22 * CarStatusData.SIZE)
+        offset = 0
         arr = []
         for _ in range(22):
-            cs = CarStatusData.from_bytes(b[offset : offset + CarStatusData.SIZE])
+            cs = CarStatusData.from_bytes(data[offset : offset + CarStatusData.SIZE])
             arr.append(cs)
             offset += CarStatusData.SIZE
-        return cls(header=header, car_status_data=arr)
+        return cls(header=header, car_status_data=arr), data[offset:]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()

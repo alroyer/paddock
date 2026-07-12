@@ -82,6 +82,8 @@ def test_packet_car_damage_roundtrip():
     pkt = PacketCarDamageData(header=hdr, car_damage_data=[one] * 22)
     b = pkt.to_bytes()
     assert len(b) == PacketCarDamageData.SIZE
-    pkt2 = PacketCarDamageData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    pkt2, remaining = PacketCarDamageData.parse(header, remaining)
+    assert remaining == b""
     assert len(pkt2.car_damage_data) == 22
     assert math.isclose(pkt2.car_damage_data[0].tyres_wear[3], 1.3, rel_tol=1e-6)

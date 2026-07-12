@@ -62,7 +62,9 @@ def test_packet_tyre_sets_roundtrip():
     )
     b = packet.to_bytes()
     assert len(b) == PacketTyreSetsData.SIZE
-    packet2 = PacketTyreSetsData.from_bytes(b)
+    header, remaining = PacketHeader.parse(b)
+    packet2, remaining = PacketTyreSetsData.parse(header, remaining)
+    assert remaining == b""
     assert packet2.car_idx == packet.car_idx
     assert packet2.fitted_idx == packet.fitted_idx
     assert packet2.tyre_set_data[5].fitted == 1

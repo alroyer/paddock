@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar
 
+from .base import BasePacket
 from .constants import BYTES_ORDER
 from .header import PacketHeader
 
@@ -66,7 +67,7 @@ class TyreSetData:
 
 
 @dataclass(frozen=True)
-class PacketTyreSetsData:
+class PacketTyreSetsData(BasePacket):
     header: PacketHeader
     car_idx: int
     tyre_set_data: tuple[TyreSetData, ...]
@@ -75,29 +76,29 @@ class PacketTyreSetsData:
     SIZE: ClassVar[int] = PacketHeader.SIZE + 1 + TyreSetData.SIZE * 20 + 1
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketTyreSetsData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def parse(
+        cls, header: PacketHeader, data: bytes
+    ) -> tuple["PacketTyreSetsData", bytes]:
+        data = cls._require_bytes(data, 1 + TyreSetData.SIZE * 20 + 1)
 
-        header = PacketHeader.from_bytes(b[: PacketHeader.SIZE])
-        offset = PacketHeader.SIZE
-        car_idx = struct.unpack_from(_ENDIAN + "B", b[offset : offset + 1])[0]
+        offset = 0
+        car_idx = struct.unpack_from(_ENDIAN + "B", data[offset : offset + 1])[0]
         offset += 1
 
         tyre_sets = []
         for _ in range(20):
-            tyre_set = TyreSetData.from_bytes(b[offset : offset + TyreSetData.SIZE])
+            tyre_set = TyreSetData.from_bytes(data[offset : offset + TyreSetData.SIZE])
             tyre_sets.append(tyre_set)
             offset += TyreSetData.SIZE
 
-        fitted_idx = struct.unpack_from(_ENDIAN + "B", b[offset : offset + 1])[0]
+        fitted_idx = struct.unpack_from(_ENDIAN + "B", data[offset : offset + 1])[0]
 
         return cls(
             header=header,
             car_idx=car_idx,
             tyre_set_data=tuple(tyre_sets),
             fitted_idx=fitted_idx,
-        )
+        ), data[offset + 1 :]
 
     def to_bytes(self) -> bytes:
         b = self.header.to_bytes()
