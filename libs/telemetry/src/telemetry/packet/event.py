@@ -2,6 +2,7 @@ import struct
 from dataclasses import dataclass
 from typing import ClassVar, cast
 
+from .base import BasePacket
 from .constants import BYTES_ORDER, EVENT_CODES
 from .header import PacketHeader
 
@@ -98,7 +99,7 @@ class EventDataDetails:
 
 
 @dataclass(frozen=True)
-class PacketEventData:
+class PacketEventData(BasePacket):
     header: PacketHeader
     event_string_code: bytes
     event_details: EventDataDetails
@@ -106,15 +107,17 @@ class PacketEventData:
     SIZE: ClassVar[int] = PacketHeader.SIZE + 4 + EventDataDetails.SIZE
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "PacketEventData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        header = PacketHeader.from_bytes(b)
+    def from_bytes(cls, data: bytes) -> BasePacket:
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
+        header = PacketHeader.from_bytes(data)
         offset = PacketHeader.SIZE
-        event_string_code = b[offset : offset + 4]
+        event_string_code = data[offset : offset + 4]
         offset += 4
         event_details = EventDataDetails.from_bytes(
-            b[offset : offset + EventDataDetails.SIZE]
+            data[offset : offset + EventDataDetails.SIZE]
         )
         return cls(
             header=header,

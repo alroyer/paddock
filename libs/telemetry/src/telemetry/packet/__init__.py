@@ -1,3 +1,4 @@
+from .base import BasePacket
 from .car_damage import PacketCarDamageData
 from .car_setup import PacketCarSetupData
 from .car_status import PacketCarStatusData
@@ -17,6 +18,7 @@ from .time_trial import PacketTimeTrialData, TimeTrialDataSet
 from .tyre_sets import PacketTyreSetsData, TyreSetData
 
 __all__ = [
+    "BasePacket",
     "CarTelemetryData",
     "PacketCarDamageData",
     "PacketCarSetupData",

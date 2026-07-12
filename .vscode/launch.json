@@ -10,7 +10,13 @@
             "request": "launch",
             "program": "${workspaceFolder}/apps/recorder/main.py",
             "console": "integratedTerminal",
-            // "args": "${command:pickArgs}"
+        },
+        {
+            "name": "viewer",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/apps/viewer/main.py",
+            "console": "integratedTerminal",
         }
     ]
 }
