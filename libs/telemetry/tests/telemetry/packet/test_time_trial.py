@@ -1,22 +1,6 @@
+from helpers import make_header
 from telemetry.packet.header import PacketHeader
 from telemetry.packet.time_trial import PacketTimeTrialData, TimeTrialDataSet
-
-
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
 
 
 def test_time_trial_data_set_roundtrip():
@@ -42,7 +26,7 @@ def test_time_trial_data_set_roundtrip():
 
 
 def test_packet_time_trial_data_roundtrip():
-    header = _make_header()
+    header = make_header(14)
     data_set = TimeTrialDataSet(
         car_idx=1,
         team_id=7,

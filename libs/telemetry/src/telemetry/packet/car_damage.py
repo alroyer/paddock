@@ -160,3 +160,9 @@ class PacketCarDamageData(BasePacket):
         for cd in self.car_damage_data:
             b += cd.to_bytes()
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 10:
+            raise ValueError(
+                f"Invalid packet_id for PacketCarDamageData: {self.header.packet_id}"
+            )

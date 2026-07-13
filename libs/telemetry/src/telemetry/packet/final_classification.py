@@ -138,3 +138,9 @@ class PacketFinalClassificationData(BasePacket):
         for fc in self.classification_data:
             b += fc.to_bytes()
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 8:
+            raise ValueError(
+                f"Invalid packet_id for PacketFinalClassificationData: {self.header.packet_id}"
+            )

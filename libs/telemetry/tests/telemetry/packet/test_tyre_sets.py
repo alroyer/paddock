@@ -1,22 +1,6 @@
+from helpers import make_header
 from telemetry.packet.header import PacketHeader
 from telemetry.packet.tyre_sets import PacketTyreSetsData, TyreSetData
-
-
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
 
 
 def test_tyre_set_roundtrip():
@@ -39,7 +23,7 @@ def test_tyre_set_roundtrip():
 
 
 def test_packet_tyre_sets_roundtrip():
-    header = _make_header()
+    header = make_header(12)
     tyre_sets = [
         TyreSetData(
             actual_tyre_compound=i % 10,

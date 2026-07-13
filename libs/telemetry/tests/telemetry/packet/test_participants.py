@@ -1,3 +1,4 @@
+from helpers import make_header
 from telemetry.packet.header import PacketHeader
 from telemetry.packet.participants import (
     LiveryColour,
@@ -6,21 +7,8 @@ from telemetry.packet.participants import (
 )
 
 
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
+def test_packet_participants_data_size():
+    assert PacketParticipantsData.SIZE == 1284
 
 
 def test_participant_roundtrip():
@@ -59,7 +47,7 @@ def test_participant_roundtrip():
 
 
 def test_packet_participants_roundtrip():
-    hdr = _make_header()
+    hdr = make_header(4)
     one = ParticipantData(
         ai_controlled=0,
         driver_id=1,

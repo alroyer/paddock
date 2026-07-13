@@ -1,22 +1,6 @@
+from helpers import make_header
 from telemetry.packet.header import PacketHeader
 from telemetry.packet.lobby import LobbyInfoData, PacketLobbyInfoData
-
-
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
 
 
 def test_lobby_info_roundtrip():
@@ -40,7 +24,7 @@ def test_lobby_info_roundtrip():
 
 
 def test_packet_lobby_roundtrip():
-    hdr = _make_header()
+    hdr = make_header(9)
     one = LobbyInfoData(
         ai_controlled=1,
         team_id=2,

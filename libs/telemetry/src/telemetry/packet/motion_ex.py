@@ -119,3 +119,9 @@ class PacketMotionExData(BasePacket):
             *self.wheel_camber_gain,
         ]
         return self.header.to_bytes() + struct.pack(self.STRUCT_FMT, *values)
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 13:
+            raise ValueError(
+                f"Invalid packet_id for PacketMotionExData: {self.header.packet_id}"
+            )

@@ -159,3 +159,9 @@ class PacketCarSetupData(BasePacket):
             b += cs.to_bytes()
         b += struct.pack(_ENDIAN + "f", self.next_front_wing_value)
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 5:
+            raise ValueError(
+                f"Invalid packet_id for PacketCarSetupData: {self.header.packet_id}"
+            )

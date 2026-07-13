@@ -18,7 +18,7 @@ class EventDataDetails:
 
     raw: bytes
 
-    SIZE: ClassVar[int] = 32
+    SIZE: ClassVar[int] = 12
 
     @classmethod
     def from_bytes(cls, data: bytes) -> "EventDataDetails":

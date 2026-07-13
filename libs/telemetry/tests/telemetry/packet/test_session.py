@@ -1,6 +1,14 @@
 import math
 
-from telemetry.packet.session import MarshalZone, WeatherForecastSample
+from telemetry.packet.session import (
+    MarshalZone,
+    PacketSessionData,
+    WeatherForecastSample,
+)
+
+
+def test_packet_session_data_size():
+    assert PacketSessionData.SIZE == 753
 
 
 def test_marshal_zone_roundtrip():

@@ -1,26 +1,10 @@
+from helpers import make_header
 from telemetry.packet.header import PacketHeader
 from telemetry.packet.session_history import (
     LapHistoryData,
     PacketSessionHistoryData,
     TyreStintHistoryData,
 )
-
-
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
 
 
 def test_lap_history_roundtrip():
@@ -51,7 +35,7 @@ def test_tyre_stint_history_roundtrip():
 
 
 def test_packet_session_history_roundtrip():
-    hdr = _make_header()
+    hdr = make_header(11)
     laps = [LapHistoryData(0, 0, 0, 0, 0, 0, 0, 0)] * 100
     stints = [TyreStintHistoryData(0, 0, 0)] * 8
     pkt = PacketSessionHistoryData(

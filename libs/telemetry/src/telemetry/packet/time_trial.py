@@ -119,3 +119,9 @@ class PacketTimeTrialData(BasePacket):
         b += self.personal_best_data_set.to_bytes()
         b += self.rival_data_set.to_bytes()
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 14:
+            raise ValueError(
+                f"Invalid packet_id for PacketTimeTrialData: {self.header.packet_id}"
+            )

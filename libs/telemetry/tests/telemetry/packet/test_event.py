@@ -1,28 +1,16 @@
 import math
 
+from helpers import make_header
 from telemetry.packet.event import EventDataDetails, PacketEventData
 from telemetry.packet.header import PacketHeader
 
 
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
+def test_packet_event_data_size():
+    assert PacketEventData.SIZE == 45
 
 
 def test_fastest_lap_roundtrip():
-    hdr = _make_header()
+    hdr = make_header(0)
     details = EventDataDetails.from_fastest_lap(5, 78.912)
     pkt = PacketEventData(header=hdr, event_string_code=b"FTLP", event_details=details)
     b = pkt.to_bytes()
@@ -39,7 +27,7 @@ def test_fastest_lap_roundtrip():
 
 
 def test_speed_trap_roundtrip():
-    hdr = _make_header()
+    hdr = make_header(1)
     details = EventDataDetails.from_speed_trap(3, 320.5, 1, 0, 7, 322.1)
     pkt = PacketEventData(header=hdr, event_string_code=b"SPTP", event_details=details)
     b = pkt.to_bytes()
@@ -61,7 +49,7 @@ def test_speed_trap_roundtrip():
 
 
 def test_flashback_roundtrip():
-    hdr = _make_header()
+    hdr = make_header(2)
     details = EventDataDetails.from_flashback(123456, 45.67)
     pkt = PacketEventData(header=hdr, event_string_code=b"FLBK", event_details=details)
     b = pkt.to_bytes()

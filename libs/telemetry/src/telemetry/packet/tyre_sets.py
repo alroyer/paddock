@@ -107,3 +107,9 @@ class PacketTyreSetsData(BasePacket):
             b += tyre_set.to_bytes()
         b += struct.pack(_ENDIAN + "B", self.fitted_idx)
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 12:
+            raise ValueError(
+                f"Invalid packet_id for PacketTyreSetsData: {self.header.packet_id}"
+            )

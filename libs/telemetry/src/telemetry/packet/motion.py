@@ -122,3 +122,9 @@ class PacketMotionData(BasePacket):
         for cmd in self.car_motion_data:
             data += cmd.to_bytes()
         return data
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 0:
+            raise ValueError(
+                f"Invalid packet_id for PacketMotionData: {self.header.packet_id}"
+            )

@@ -156,3 +156,9 @@ class PacketCarStatusData(BasePacket):
         for cs in self.car_status_data:
             b += cs.to_bytes()
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 7:
+            raise ValueError(
+                f"Invalid packet_id for PacketCarStatusData: {self.header.packet_id}"
+            )

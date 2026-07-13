@@ -4,6 +4,10 @@ from telemetry.packet.header import PacketHeader
 from telemetry.packet.lap import LapData, PacketLapData
 
 
+def test_packet_lap_data_size():
+    assert PacketLapData.SIZE == 1285
+
+
 def test_lap_data_roundtrip():
     lap = LapData(
         last_lap_time_in_ms=90000,

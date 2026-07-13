@@ -161,3 +161,9 @@ class PacketParticipantsData(BasePacket):
         for p in self.participants:
             b += p.to_bytes()
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 4:
+            raise ValueError(
+                f"Invalid packet_id for PacketParticipantsData: {self.header.packet_id}"
+            )

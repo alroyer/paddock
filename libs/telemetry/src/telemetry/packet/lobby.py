@@ -108,3 +108,9 @@ class PacketLobbyInfoData(BasePacket):
         for p in self.lobby_players:
             b += p.to_bytes()
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 9:
+            raise ValueError(
+                f"Invalid packet_id for PacketLobbyInfoData: {self.header.packet_id}"
+            )

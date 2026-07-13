@@ -204,5 +204,8 @@ class PacketLapData(BasePacket):
         )
         return b
 
-
-__all__ = ["LapData", "PacketLapData"]
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 2:
+            raise ValueError(
+                f"Invalid packet_id for PacketLapData: {self.header.packet_id}"
+            )

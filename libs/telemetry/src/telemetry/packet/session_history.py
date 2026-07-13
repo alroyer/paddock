@@ -176,3 +176,9 @@ class PacketSessionHistoryData(BasePacket):
         for th in self.tyre_stints_history_data:
             b += th.to_bytes()
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 11:
+            raise ValueError(
+                f"Invalid packet_id for PacketSessionHistoryData: {self.header.packet_id}"
+            )

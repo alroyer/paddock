@@ -183,3 +183,9 @@ class PacketCarTelemetryData(BasePacket):
             self.suggested_gear,
         )
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 6:
+            raise ValueError(
+                f"Invalid packet_id for PacketCarTelemetryData: {self.header.packet_id}"
+            )

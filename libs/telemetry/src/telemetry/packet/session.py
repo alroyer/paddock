@@ -161,7 +161,7 @@ class PacketSessionData(BasePacket):
     sector3_lap_distance_start: float
 
     PRE_FMT: ClassVar[str] = (
-        "<BbbBHbBHHBBBBBB" if BYTES_ORDER == "little" else ">BbbBHbBHHBBBBBB"
+        "<BbbBHbBHHBBBBBBB" if BYTES_ORDER == "little" else ">BbbBHbBHHBBBBBBB"
     )
     PRE_SIZE: ClassVar[int] = struct.calcsize(PRE_FMT)
 
@@ -376,7 +376,13 @@ class PacketSessionData(BasePacket):
             weekend_structure=list(weekend_structure),
             sector2_lap_distance_start=sector2_lap_distance_start,
             sector3_lap_distance_start=sector3_lap_distance_start,
-        )
+        ), data[
+            cls.PRE_SIZE
+            + 21 * MarshalZone.SIZE
+            + cls.MID_SIZE
+            + 64 * WeatherForecastSample.SIZE
+            + cls.TAIL_SIZE :
+        ]
 
     def to_bytes(self) -> bytes:
         if len(self.marshal_zones) != 21:

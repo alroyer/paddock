@@ -1,27 +1,11 @@
+from helpers import make_header
 from telemetry.packet.header import PacketHeader
 from telemetry.packet.motion_ex import PacketMotionExData
 
 
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
-
-
 def test_packet_motion_ex_roundtrip():
     packet = PacketMotionExData(
-        header=_make_header(),
+        header=make_header(13),
         suspension_position=(1.0, 2.0, 3.0, 4.0),
         suspension_velocity=(5.0, 6.0, 7.0, 8.0),
         suspension_acceleration=(9.0, 10.0, 11.0, 12.0),

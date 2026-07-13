@@ -4,6 +4,10 @@ from telemetry.packet.header import PacketHeader
 from telemetry.packet.motion import CarMotionData, PacketMotionData
 
 
+def test_packet_motion_data_size():
+    assert PacketMotionData.SIZE == 1349
+
+
 def test_car_motion_data_roundtrip():
     motion = CarMotionData(
         1.0,

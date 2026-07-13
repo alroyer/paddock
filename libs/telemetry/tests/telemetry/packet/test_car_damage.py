@@ -1,24 +1,8 @@
 import math
 
+from helpers import make_header
+from telemetry.packet import PacketHeader
 from telemetry.packet.car_damage import CarDamageData, PacketCarDamageData
-from telemetry.packet.header import PacketHeader
-
-
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
 
 
 def test_car_damage_roundtrip():
@@ -54,7 +38,7 @@ def test_car_damage_roundtrip():
 
 
 def test_packet_car_damage_roundtrip():
-    hdr = _make_header()
+    hdr = make_header(10)
     one = CarDamageData(
         tyres_wear=[1.0, 1.1, 1.2, 1.3],
         tyres_damage=[0, 0, 0, 0],

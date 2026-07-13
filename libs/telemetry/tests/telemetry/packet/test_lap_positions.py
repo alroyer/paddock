@@ -1,26 +1,10 @@
+from helpers import make_header
 from telemetry.packet.header import PacketHeader
 from telemetry.packet.lap_positions import PacketLapPositionsData
 
 
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
-
-
 def test_packet_lap_positions_roundtrip():
-    header = _make_header()
+    header = make_header(15)
     data = PacketLapPositionsData(
         header=header,
         num_laps=3,

@@ -1,27 +1,11 @@
 import math
 
+from helpers import make_header
 from telemetry.packet.final_classification import (
     FinalClassificationData,
     PacketFinalClassificationData,
 )
 from telemetry.packet.header import PacketHeader
-
-
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
 
 
 def test_final_classification_roundtrip():
@@ -51,7 +35,7 @@ def test_final_classification_roundtrip():
 
 
 def test_packet_final_classification_roundtrip():
-    hdr = _make_header()
+    hdr = make_header(8)
     one = FinalClassificationData(
         position=2,
         num_laps=57,

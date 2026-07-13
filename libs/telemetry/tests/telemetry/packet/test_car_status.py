@@ -1,24 +1,12 @@
 import math
 
+from helpers import make_header
 from telemetry.packet.car_status import CarStatusData, PacketCarStatusData
 from telemetry.packet.header import PacketHeader
 
 
-def _make_header():
-    return PacketHeader(
-        2025,
-        25,
-        1,
-        0,
-        1,
-        0,
-        1234567890123456789,
-        12.34,
-        100,
-        1000,
-        0,
-        255,
-    )
+def test_packet_car_status_data_size():
+    assert PacketCarStatusData.SIZE == 1239
 
 
 def test_car_status_roundtrip():
@@ -58,7 +46,7 @@ def test_car_status_roundtrip():
 
 
 def test_packet_car_status_roundtrip():
-    hdr = _make_header()
+    hdr = make_header(7)
     one = CarStatusData(
         traction_control=0,
         anti_lock_brakes=1,

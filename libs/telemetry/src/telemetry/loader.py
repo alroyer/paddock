@@ -1,24 +1,15 @@
 from pathlib import Path
 
-from .packet import BasePacket, PacketEventData, PacketHeader, PacketMotionData
+from .packet import PACKET_PARSERS, BasePacket, PacketHeader
 
 
 def load_telemetry(path: str | Path) -> list[BasePacket]:
     with open(path, "rb") as f:
         data = f.read()
-
     packets: list[BasePacket] = []
-
     while data:
         header, data = PacketHeader.parse(data)
-        match header.packet_id:
-            case 0:
-                packet, data = PacketMotionData.parse(header, data)
-                packets.append(packet)
-            case 3:
-                packet, data = PacketEventData.parse(header, data)
-                packets.append(packet)
-            case _:
-                raise ValueError(f"Unknown packet_id: {header.packet_id}")
-
+        packet, data = PACKET_PARSERS[header.packet_id](header, data)
+        print(f"Loaded packet: {packet.__class__.__name__} (ID: {header.packet_id})")
+        packets.append(packet)
     return packets

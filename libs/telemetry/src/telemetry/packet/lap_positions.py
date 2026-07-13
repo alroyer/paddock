@@ -50,3 +50,9 @@ class PacketLapPositionsData(BasePacket):
         for row in self.position_for_vehicle_idx:
             b += struct.pack(_ENDIAN + f"{MAX_CARS}B", *row)
         return b
+
+    def __post_init__(self) -> None:
+        if self.header.packet_id != 15:
+            raise ValueError(
+                f"Invalid packet_id for PacketLapPositionsData: {self.header.packet_id}"
+            )
