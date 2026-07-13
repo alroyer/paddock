@@ -32,9 +32,11 @@ class CarMotionData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "CarMotionData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "CarMotionData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             world_position_x,
             world_position_y,
@@ -54,7 +56,7 @@ class CarMotionData:
             yaw,
             pitch,
             roll,
-        ) = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+        ) = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
 
         return cls(
             world_position_x=world_position_x,

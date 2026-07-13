@@ -25,9 +25,11 @@ class TyreSetData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "TyreSetData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "TyreSetData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             actual_tyre_compound,
             visual_tyre_compound,
@@ -38,7 +40,7 @@ class TyreSetData:
             usable_life,
             lap_delta_time,
             fitted,
-        ) = struct.unpack_from(cls.STRUCT_FMT, b)
+        ) = struct.unpack_from(cls.STRUCT_FMT, data)
         return cls(
             actual_tyre_compound=actual_tyre_compound,
             visual_tyre_compound=visual_tyre_compound,

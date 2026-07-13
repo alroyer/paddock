@@ -51,9 +51,11 @@ class LapData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "LapData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "LapData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             last_lap_time_in_ms,
             current_lap_time_in_ms,
@@ -88,7 +90,7 @@ class LapData:
             pit_stop_should_serve_pen,
             speed_trap_fastest_speed,
             speed_trap_fastest_lap,
-        ) = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+        ) = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
         return cls(
             last_lap_time_in_ms=last_lap_time_in_ms,
             current_lap_time_in_ms=current_lap_time_in_ms,

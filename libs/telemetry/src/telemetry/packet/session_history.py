@@ -24,9 +24,11 @@ class LapHistoryData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "LapHistoryData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "LapHistoryData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             lap_time_in_ms,
             sector1_time_ms_part,
@@ -36,7 +38,7 @@ class LapHistoryData:
             sector3_time_ms_part,
             sector3_time_minutes_part,
             lap_valid_bit_flags,
-        ) = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+        ) = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
         return cls(
             lap_time_in_ms=lap_time_in_ms,
             sector1_time_ms_part=sector1_time_ms_part,
@@ -72,11 +74,13 @@ class TyreStintHistoryData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "TyreStintHistoryData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "TyreStintHistoryData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         end_lap, tyre_actual_compound, tyre_visual_compound = struct.unpack(
-            cls.STRUCT_FMT, b[: cls.SIZE]
+            cls.STRUCT_FMT, data[: cls.SIZE]
         )
         return cls(
             end_lap=end_lap,

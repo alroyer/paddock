@@ -39,10 +39,12 @@ class CarSetupData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "CarSetupData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        unpacked = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+    def from_bytes(cls, data: bytes) -> "CarSetupData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
+        unpacked = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
         (
             front_wing,
             rear_wing,

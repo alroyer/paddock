@@ -26,9 +26,11 @@ class LobbyInfoData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "LobbyInfoData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "LobbyInfoData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             ai_controlled,
             team_id,
@@ -40,7 +42,7 @@ class LobbyInfoData:
             show_online_names,
             tech_level,
             ready_status,
-        ) = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+        ) = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
 
         name = name_b.split(b"\x00", 1)[0].decode("utf-8", errors="replace")
 

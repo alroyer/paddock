@@ -41,9 +41,11 @@ class CarStatusData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "CarStatusData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "CarStatusData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             traction_control,
             anti_lock_brakes,
@@ -70,7 +72,7 @@ class CarStatusData:
             ers_harvested_this_lap_mguh,
             ers_deployed_this_lap,
             network_paused,
-        ) = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+        ) = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
 
         return cls(
             traction_control=traction_control,

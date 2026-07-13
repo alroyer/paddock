@@ -16,10 +16,12 @@ class MarshalZone:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "MarshalZone":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        zone_start, zone_flag = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+    def from_bytes(cls, data: bytes) -> "MarshalZone":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
+        zone_start, zone_flag = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
         return cls(zone_start=zone_start, zone_flag=zone_flag)
 
     def to_bytes(self) -> bytes:
@@ -41,9 +43,11 @@ class WeatherForecastSample:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "WeatherForecastSample":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "WeatherForecastSample":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             session_type,
             time_offset,
@@ -53,7 +57,7 @@ class WeatherForecastSample:
             air_temperature,
             air_temperature_change,
             rain_percentage,
-        ) = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+        ) = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
         return cls(
             session_type=session_type,
             time_offset=time_offset,

@@ -28,9 +28,11 @@ class TimeTrialDataSet:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "TimeTrialDataSet":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "TimeTrialDataSet":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             car_idx,
             team_id,
@@ -44,7 +46,7 @@ class TimeTrialDataSet:
             equal_car_performance,
             custom_setup,
             valid,
-        ) = struct.unpack_from(cls.STRUCT_FMT, b)
+        ) = struct.unpack_from(cls.STRUCT_FMT, data)
         return cls(
             car_idx=car_idx,
             team_id=team_id,

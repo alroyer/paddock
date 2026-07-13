@@ -32,9 +32,11 @@ class CarTelemetryData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "CarTelemetryData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
+    def from_bytes(cls, data: bytes) -> "CarTelemetryData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
         (
             speed,
             throttle,
@@ -67,7 +69,7 @@ class CarTelemetryData:
             surface_type1,
             surface_type2,
             surface_type3,
-        ) = struct.unpack_from(cls.STRUCT_FMT, b)
+        ) = struct.unpack_from(cls.STRUCT_FMT, data)
 
         return cls(
             speed=speed,

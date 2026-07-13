@@ -19,10 +19,12 @@ class LiveryColour:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "LiveryColour":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        r, g, bl = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+    def from_bytes(cls, data: bytes) -> "LiveryColour":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
+        r, g, bl = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
         return cls(red=r, green=g, blue=bl)
 
     def to_bytes(self) -> bytes:
@@ -50,10 +52,12 @@ class ParticipantData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, b: bytes) -> "ParticipantData":
-        if len(b) < cls.SIZE:
-            raise ValueError(f"buffer too small: need {cls.SIZE} bytes, got {len(b)}")
-        unpacked = struct.unpack(cls.STRUCT_FMT, b[: cls.SIZE])
+    def from_bytes(cls, data: bytes) -> "ParticipantData":
+        if len(data) < cls.SIZE:
+            raise ValueError(
+                f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
+            )
+        unpacked = struct.unpack(cls.STRUCT_FMT, data[: cls.SIZE])
         (
             ai,
             driverId,
