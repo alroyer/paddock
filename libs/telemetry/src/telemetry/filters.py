@@ -12,7 +12,22 @@ def list_sessions(packets: Iterable[BasePacket]) -> list[str]:
     return list(sessions)
 
 
-def list_packets(session: str, packets: Iterable[BasePacket]) -> list[BasePacket]:
-    return [
-        packet for packet in packets if getattr(packet, "header").session_uid == session
-    ]
+def filter_packets(
+    packets: Iterable[BasePacket],
+    session: str | None = None,
+    packet_id: int | None = None,
+) -> list[BasePacket]:
+    filtered_packets = packets
+    if session is not None:
+        filtered_packets = [
+            packet
+            for packet in filtered_packets
+            if getattr(packet, "header").session_uid == session
+        ]
+    if packet_id is not None:
+        filtered_packets = [
+            packet
+            for packet in filtered_packets
+            if getattr(packet, "header").packet_id == packet_id
+        ]
+    return list(filtered_packets)
