@@ -70,7 +70,6 @@ class TyreSetData:
 
 @dataclass(frozen=True)
 class PacketTyreSetsData(BasePacket):
-    header: PacketHeader
     car_idx: int
     tyre_set_data: tuple[TyreSetData, ...]
     fitted_idx: int

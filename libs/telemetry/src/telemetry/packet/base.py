@@ -8,6 +8,8 @@ T = TypeVar("T", bound="BasePacket")
 
 @dataclass(frozen=True)
 class BasePacket(Generic[T]):
+    header: PacketHeader
+
     @classmethod
     def parse(cls, header: PacketHeader, data: bytes) -> tuple[T, bytes]:
         raise NotImplementedError

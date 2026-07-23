@@ -128,7 +128,6 @@ class CarSetupData:
 
 @dataclass(frozen=True)
 class PacketCarSetupData(BasePacket):
-    header: PacketHeader
     car_setups: list[CarSetupData]
     next_front_wing_value: float
 

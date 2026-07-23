@@ -109,7 +109,6 @@ class FinalClassificationData:
 
 @dataclass(frozen=True)
 class PacketFinalClassificationData(BasePacket):
-    header: PacketHeader
     num_cars: int
     classification_data: list[FinalClassificationData]
 

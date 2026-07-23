@@ -81,7 +81,6 @@ class LobbyInfoData:
 
 @dataclass(frozen=True)
 class PacketLobbyInfoData(BasePacket):
-    header: PacketHeader
     num_players: int
     lobby_players: list[LobbyInfoData]
 

@@ -82,7 +82,6 @@ class TimeTrialDataSet:
 
 @dataclass(frozen=True)
 class PacketTimeTrialData(BasePacket):
-    header: PacketHeader
     player_session_best_data_set: TimeTrialDataSet
     personal_best_data_set: TimeTrialDataSet
     rival_data_set: TimeTrialDataSet

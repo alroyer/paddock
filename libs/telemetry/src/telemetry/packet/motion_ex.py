@@ -11,7 +11,6 @@ _ENDIAN = "<" if BYTES_ORDER == "little" else ">"
 
 @dataclass(frozen=True)
 class PacketMotionExData(BasePacket):
-    header: PacketHeader
     suspension_position: tuple[float, float, float, float]
     suspension_velocity: tuple[float, float, float, float]
     suspension_acceleration: tuple[float, float, float, float]

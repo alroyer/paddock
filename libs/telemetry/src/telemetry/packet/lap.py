@@ -168,7 +168,6 @@ class LapData:
 
 @dataclass(frozen=True)
 class PacketLapData(BasePacket):
-    header: PacketHeader
     lap_data: list[LapData]
     time_trial_pb_car_idx: int
     time_trial_rival_car_idx: int

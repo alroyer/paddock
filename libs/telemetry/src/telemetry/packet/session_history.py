@@ -99,7 +99,6 @@ class TyreStintHistoryData:
 
 @dataclass(frozen=True)
 class PacketSessionHistoryData(BasePacket):
-    header: PacketHeader
     car_idx: int
     num_laps: int
     num_tyre_stints: int

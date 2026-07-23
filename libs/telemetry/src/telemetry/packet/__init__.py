@@ -3,6 +3,7 @@ from .car_damage import PacketCarDamageData
 from .car_setup import PacketCarSetupData
 from .car_status import PacketCarStatusData
 from .car_telemetry import CarTelemetryData, PacketCarTelemetryData
+from .constants import PacketId
 from .event import PacketEventData
 from .final_classification import PacketFinalClassificationData
 from .header import PacketHeader
@@ -29,6 +30,7 @@ __all__ = [
     "PacketHeader",
     "PacketTyreSetsData",
     "TyreSetData",
+    "PacketId",
     "PacketTimeTrialData",
     "TimeTrialDataSet",
     "PacketLapData",

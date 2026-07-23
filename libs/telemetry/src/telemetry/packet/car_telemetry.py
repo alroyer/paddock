@@ -139,7 +139,6 @@ class CarTelemetryData:
 
 @dataclass(frozen=True)
 class PacketCarTelemetryData(BasePacket):
-    header: PacketHeader
     car_telemetry_data: tuple[CarTelemetryData, ...]
     mfd_panel_index: int
     mfd_panel_index_secondary_player: int

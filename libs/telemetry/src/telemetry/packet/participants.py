@@ -134,7 +134,6 @@ class ParticipantData:
 
 @dataclass(frozen=True)
 class PacketParticipantsData(BasePacket):
-    header: PacketHeader
     num_active_cars: int
     participants: list[ParticipantData]
 

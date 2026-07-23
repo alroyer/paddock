@@ -143,7 +143,6 @@ class CarDamageData:
 
 @dataclass(frozen=True)
 class PacketCarDamageData(BasePacket):
-    header: PacketHeader
     car_damage_data: list[CarDamageData]
 
     SIZE: ClassVar[int] = PacketHeader.SIZE + 22 * CarDamageData.SIZE

@@ -85,7 +85,6 @@ class WeatherForecastSample:
 
 @dataclass(frozen=True)
 class PacketSessionData(BasePacket):
-    header: PacketHeader
     weather: int
     track_temperature: int
     air_temperature: int

@@ -102,7 +102,6 @@ class EventDataDetails:
 
 @dataclass(frozen=True)
 class PacketEventData(BasePacket):
-    header: PacketHeader
     event_string_code: bytes
     event_details: EventDataDetails
 

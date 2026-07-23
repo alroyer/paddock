@@ -1,25 +1,27 @@
 import sys
+from enum import IntEnum
 
 BYTES_ORDER = sys.byteorder
 
-PACKET_ID = {
-    0: "Motion",
-    1: "Session",
-    2: "LapData",
-    3: "Event",
-    4: "Participants",
-    5: "CarSetups",
-    6: "CarTelemetry",
-    7: "CarStatus",
-    8: "FinalClassification",
-    9: "LobbyInfo",
-    10: "CarDamage",
-    11: "SessionHistory",
-    12: "TyreSets",
-    13: "MotionEx",
-    14: "TimeTrial",
-    15: "LapPositions",
-}
+
+class PacketId(IntEnum):
+    Motion = 0
+    Session = 1
+    LapData = 2
+    Event = 3
+    Participants = 4
+    CarSetups = 5
+    CarTelemetry = 6
+    CarStatus = 7
+    FinalClassification = 8
+    LobbyInfo = 9
+    CarDamage = 10
+    SessionHistory = 11
+    TyreSets = 12
+    MotionEx = 13
+    TimeTrial = 14
+    LapPositions = 15
+
 
 GAME_MODE_ID = {
     4: "Grand Prix '23",

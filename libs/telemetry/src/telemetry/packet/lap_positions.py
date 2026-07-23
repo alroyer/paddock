@@ -14,7 +14,6 @@ MAX_CARS = 22
 
 @dataclass(frozen=True)
 class PacketLapPositionsData(BasePacket):
-    header: PacketHeader
     num_laps: int
     lap_start: int
     position_for_vehicle_idx: tuple[tuple[int, ...], ...]
