@@ -1,4 +1,4 @@
-from telemetry.filters import filter_packets, list_sessions
+from telemetry.filters import filter_packets
 from telemetry.loader import load_telemetry
 from telemetry.packet import PacketId
 

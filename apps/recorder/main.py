@@ -1,31 +1,29 @@
-import pathlib
 import socket
 import threading
 from datetime import datetime
+from pathlib import Path
 
-import typer
+from typer import Option, Typer
 
-DEFAULT_DATA_PATH = pathlib.Path("./data")
+DEFAULT_DATA_PATH = Path("./data")
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 8080
 
-app = typer.Typer()
+app = Typer()
 
 
 @app.command()
 def main(
-    host: str = typer.Option(DEFAULT_HOST, help="Host to bind the server to"),
-    port: int = typer.Option(DEFAULT_PORT, help="Port to bind the server to"),
-    data_path: pathlib.Path = typer.Option(
-        DEFAULT_DATA_PATH, help="Path to the data directory"
-    ),
+    host: str = Option(DEFAULT_HOST, help="Host to bind the server to"),
+    port: int = Option(DEFAULT_PORT, help="Port to bind the server to"),
+    data_path: Path = Option(DEFAULT_DATA_PATH, help="Path to the data directory"),
 ) -> None:
     print(f"""
    _______________/___                     |
   |                   |                    | Host: {host}
   |   [REC] ●         |==\\    /|           | Port: {port}
   |                   |   |==| |           |
-  |   ____________    |==/    \\|           | Data path: {data_path}
+  |   ____________    |==/    \\|           | Data path: {data_path.absolute()}
   |  |____________|   |                    |
   |___________________|                    |
          /     \\                           |
@@ -61,7 +59,7 @@ def main(
 
 
 class UDPTelemetryRecorder:
-    def __init__(self, host: str, port: int, data_path: pathlib.Path) -> None:
+    def __init__(self, host: str, port: int, data_path: Path) -> None:
         self.host = host
         self.port = port
         self.data_path = data_path
@@ -113,12 +111,9 @@ class UDPTelemetryRecorder:
                     break
 
 
-def _create_data_directory(data_path: pathlib.Path) -> bool:
-    if not data_path.exists():
-        data_path.mkdir(parents=True, exist_ok=True)
-        return True
-    else:
-        return False
+def _create_data_directory(data_path: Path) -> bool:
+    data_path.mkdir(parents=True, exist_ok=True)
+    return True
 
 
 if __name__ == "__main__":
