@@ -9,5 +9,8 @@ dependencies = [
     "typer>=0.26.7",
 ]
 
+[project.scripts]
+recorder = "recorder:main"
+
 [tool.uv.sources]
 telemetry = { workspace = true }

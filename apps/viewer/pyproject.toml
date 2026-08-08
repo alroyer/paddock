@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-recorder = "main:main"
+viewer = "viewer:main"
 
 [tool.uv.sources]
 telemetry = { workspace = true }
