@@ -1,8 +1,6 @@
 import queue
-import socket
 import struct
 import threading
-import time
 from pathlib import Path
 
 from rich import box
@@ -18,12 +16,10 @@ from .config import (
     DEFAULT_DATA_PATH,
     DEFAULT_HOST,
     DEFAULT_PORT,
-    DEFAULT_REPLAY_HOST,
 )
 from .events import (
     RecorderEvent,
     RecorderStoppedEvent,
-    _format_bytes,
     console,
     handle_event,
 )
@@ -103,7 +99,9 @@ def record_command(
             f" [bold green]✔[/] Created data directory [grey58]{data_path.absolute()}[/]"
         )
     else:
-        console.print(f" [grey58]Data directory already exists: {data_path.absolute()}[/]")
+        console.print(
+            f" [grey58]Data directory already exists: {data_path.absolute()}[/]"
+        )
 
     event_queue: queue.Queue[RecorderEvent] = queue.Queue()
     recorder = UDPTelemetryRecorder(
@@ -135,7 +133,7 @@ def record_command(
     while True:
         try:
             line = console.input("[bold cyan]>>>[/] ").strip()
-        except (KeyboardInterrupt, EOFError):
+        except KeyboardInterrupt, EOFError:
             break
         match line.lower():
             case "/quit" | "/bye" | "quit" | "bye":
@@ -145,7 +143,9 @@ def record_command(
             case "":
                 continue
             case _:
-                console.print(f" [yellow]Unknown command:[/] {line} [grey58](try /help)[/]")
+                console.print(
+                    f" [yellow]Unknown command:[/] {line} [grey58](try /help)[/]"
+                )
 
     recorder.stop()
     consumer_thread.join(timeout=2)
