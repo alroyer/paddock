@@ -4,7 +4,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from queue import Queue
 
-from .events import RecorderEvent, RecorderStartedEvent, RecorderStoppedEvent
+from .events import (
+    PacketReceivedEvent,
+    RecorderEvent,
+    RecorderStartedEvent,
+    RecorderStoppedEvent,
+)
 
 
 class UDPTelemetryRecorder:
@@ -18,6 +23,7 @@ class UDPTelemetryRecorder:
         self.host = host
         self.port = port
         self.data_path = data_path
+        self.output_path: Path | None = None
         self._event_queue = event_queue
         self._running = False
         self._thread: threading.Thread | None = None
@@ -33,11 +39,20 @@ class UDPTelemetryRecorder:
         self._socket.settimeout(0.5)
         self._socket.bind((self.host, self.port))
 
+        self.output_path = (
+            self.data_path
+            / f"telemetry_data_{datetime.now(UTC).strftime('%Y-%m-%d_%H-%M-%S')}.bin"
+        )
+
         self._running = True
         self._thread = threading.Thread(target=self._listen_loop, daemon=True)
         self._thread.start()
 
-        self._emit(RecorderStartedEvent(message="Started."))
+        self._emit(
+            RecorderStartedEvent(
+                message="Started.", output_path=str(self.output_path)
+            )
+        )
         return True
 
     def stop(self) -> None:
@@ -46,23 +61,28 @@ class UDPTelemetryRecorder:
             self._socket.close()
         if self._thread:
             self._thread.join(timeout=5)
-        self._emit(RecorderStoppedEvent(message="Stopped."))
+        self._emit(
+            RecorderStoppedEvent(
+                message="Stopped.",
+                output_path=str(self.output_path) if self.output_path else None,
+            )
+        )
 
     def _listen_loop(self) -> None:
-        if self._socket is None:
+        if self._socket is None or self.output_path is None:
             return
 
-        filepath = (
-            self.data_path
-            / f"telemetry_data_{datetime.now(UTC).strftime('%Y-%m-%d_%H-%M-%S')}.bin"
-        )
-        with open(filepath, "wb") as f:
+        with open(self.output_path, "wb") as f:
             while self._running:
                 try:
                     data, addr = self._socket.recvfrom(65535)
                     f.write(data)
                     self._emit(
-                        RecorderEvent(message=f"Received {len(data)} bytes from {addr}")
+                        PacketReceivedEvent(
+                            message=f"Received {len(data)} bytes from {addr}",
+                            size=len(data),
+                            source=f"{addr[0]}:{addr[1]}",
+                        )
                     )
                 except TimeoutError:
                     continue
