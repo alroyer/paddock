@@ -1,3 +1,5 @@
+import queue
+import threading
 from pathlib import Path
 
 from telemetry.filters import filter_packets
@@ -5,17 +7,15 @@ from telemetry.loader import load_telemetry
 from telemetry.packet import PacketId
 from typer import Argument, Option, Typer
 
+from .config import DEFAULT_DATA_PATH, DEFAULT_HOST, DEFAULT_PORT
+from .events import RecorderEvent, handle_event
 from .recorder import UDPTelemetryRecorder, create_data_directory
-
-DEFAULT_HOST = "0.0.0.0"
-DEFAULT_PORT = 8080
-DEFAULT_DATA_PATH = Path("./data")
 
 app = Typer()
 
 
-@app.command()
-def record(
+@app.command(name="record")
+def record_command(
     host: str = Option(DEFAULT_HOST, help="Host to bind the server to"),
     port: int = Option(DEFAULT_PORT, help="Port to bind the server to"),
     data_path: Path = Option(DEFAULT_DATA_PATH, help="Path to the data directory"),
@@ -35,19 +35,23 @@ def record(
 
 """)
 
-    data_directory_created = create_data_directory(data_path)
-    print(
-        "Data directory created.\n"
-        if data_directory_created
-        else "Data directory already exists.\n"
-    )
+    create_data_directory(data_path)
 
+    event_queue: queue.Queue[RecorderEvent] = queue.Queue()
     recorder = UDPTelemetryRecorder(
         host=host,
         port=port,
         data_path=data_path,
+        event_queue=event_queue,
     )
     recorder.start()
+
+    consumer_thread = threading.Thread(
+        target=_consume_recorder_events,
+        args=(event_queue,),
+        daemon=True,
+    )
+    consumer_thread.start()
 
     print("Listening for telemetry data. Type /quit or /bye to stop.")
     while True:
@@ -61,9 +65,16 @@ def record(
 
     recorder.stop()
 
+    consumer_thread.join(timeout=1)
 
-@app.command()
-def view(
+
+def _consume_recorder_events(event_queue: queue.Queue[RecorderEvent]) -> None:
+    while True:
+        handle_event(event_queue.get())
+
+
+@app.command(name="view")
+def view_command(
     filepath: Path = Argument(..., help="Path to the telemetry .bin file"),
     packet_id: PacketId | None = Option(None, help="Only keep packets of this type"),
 ) -> None:

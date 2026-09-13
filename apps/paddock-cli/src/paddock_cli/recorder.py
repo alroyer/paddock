@@ -2,21 +2,31 @@ import socket
 import threading
 from datetime import UTC, datetime
 from pathlib import Path
+from queue import Queue
+
+from .events import RecorderEvent, RecorderStartedEvent, RecorderStoppedEvent
 
 
 class UDPTelemetryRecorder:
-    def __init__(self, host: str, port: int, data_path: Path) -> None:
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        data_path: Path,
+        event_queue: Queue[RecorderEvent] | None = None,
+    ) -> None:
         self.host = host
         self.port = port
         self.data_path = data_path
+        self._event_queue = event_queue
         self._running = False
         self._thread: threading.Thread | None = None
         self._socket: socket.socket | None = None
 
-    def start(self) -> None:
+    def start(self) -> bool:
         if self._running:
-            print("[recorder] Already running.")
-            return
+            self._emit(RecorderEvent(message="Already running."))
+            return False
 
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -27,13 +37,16 @@ class UDPTelemetryRecorder:
         self._thread = threading.Thread(target=self._listen_loop, daemon=True)
         self._thread.start()
 
+        self._emit(RecorderStartedEvent(message="Started."))
+        return True
+
     def stop(self) -> None:
         self._running = False
         if self._socket:
             self._socket.close()
         if self._thread:
             self._thread.join(timeout=5)
-        print("[recorder] Stopped.")
+        self._emit(RecorderStoppedEvent(message="Stopped."))
 
     def _listen_loop(self) -> None:
         if self._socket is None:
@@ -48,13 +61,19 @@ class UDPTelemetryRecorder:
                 try:
                     data, addr = self._socket.recvfrom(65535)
                     f.write(data)
-                    print(f"[recorder] Received {len(data)} bytes from {addr}")
+                    self._emit(
+                        RecorderEvent(message=f"Received {len(data)} bytes from {addr}")
+                    )
                 except TimeoutError:
                     continue
                 except OSError:
                     break
                 if not self._running:
                     break
+
+    def _emit(self, event: RecorderEvent) -> None:
+        if self._event_queue is not None:
+            self._event_queue.put(event)
 
 
 def create_data_directory(data_path: Path) -> bool:
