@@ -1,11 +1,13 @@
 # paddock
 
-## Recorder
+## paddock-cli
+
+### Record
 
 Start the telemetry recorder:
 
 ```bash
-cd apps/recorder && uv run main.py
+uv run paddock-cli record
 ```
 
 Options:
@@ -17,7 +19,21 @@ Options:
 Example with custom options:
 
 ```bash
-cd apps/recorder && uv run main.py --host 127.0.0.1 --port 9090 --data-path ./my_data
+uv run paddock-cli record --host 127.0.0.1 --port 9090 --data-path ./my_data
 ```
 
 Type `/quit` or `/bye` in the terminal to stop the recorder.
+
+### View
+
+Inspect a recorded telemetry file:
+
+```bash
+uv run paddock-cli view ./data/telemetry_data_2026-07-21_10-22-44.bin
+```
+
+Filter by packet type:
+
+```bash
+uv run paddock-cli view ./data/telemetry_data_2026-07-21_10-22-44.bin --packet-id Session
+```

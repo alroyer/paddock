@@ -3,8 +3,7 @@ name = "paddock"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
-    "recorder",
-    "viewer",
+    "paddock-cli",
 ]
 
 [dependency-groups]
@@ -16,11 +15,13 @@ dev = [
 
 [tool.uv.workspace]
 members = [
-    "apps/recorder",
-    "apps/viewer",
+    "apps/paddock-cli",
     "libs/telemetry",
 ]
 
 [tool.uv.sources]
-recorder = { workspace = true }
-viewer = { workspace = true }
+paddock-cli = { workspace = true }
+
+[tool.ruff.lint]
+ignore = ["B008"]
+

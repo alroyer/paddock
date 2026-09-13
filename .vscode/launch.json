@@ -1,21 +1,22 @@
 {
     // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // Hover for full descriptions, or for more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "recorder",
+            "name": "paddock-cli record",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/apps/recorder/main.py",
+            "module": "paddock_cli.main",
+            "args": ["record"],
             "console": "integratedTerminal",
         },
         {
-            "name": "viewer",
+            "name": "paddock-cli view",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/apps/viewer/main.py",
+            "module": "paddock_cli.main",
+            "args": ["view", "./data/telemetry_data_2026-07-21_10-22-44.bin"],
             "console": "integratedTerminal",
         }
     ]
