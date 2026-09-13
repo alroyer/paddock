@@ -120,7 +120,7 @@ def record_command(
 
     console.print(
         "[bold red]●[/] Listening for telemetry data — "
-        "type [cyan]/quit[/] or press [cyan]Ctrl+C[/] to stop."
+        "type [cyan]/bye[/], [cyan]/quit[/] or press [cyan]Ctrl+C[/] to stop."
     )
 
     consumer_thread = threading.Thread(
