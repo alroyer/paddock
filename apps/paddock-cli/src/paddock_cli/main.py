@@ -166,6 +166,21 @@ def _format_lap_time(milliseconds: int | None) -> str:
     return f"{minutes}:{seconds:02d}.{millis:03d}"
 
 
+def _format_delta(milliseconds: int | None) -> str:
+    if milliseconds is None:
+        return "—"
+    sign = "+" if milliseconds >= 0 else "-"
+    return f"{sign}{abs(milliseconds) / 1_000:.3f}s"
+
+
+def _format_pace_gap(milliseconds: int | None) -> str:
+    if milliseconds is None:
+        return "—"
+    if milliseconds < 0:
+        return f"{abs(milliseconds) / 1_000:.3f}s ahead"
+    return f"{milliseconds / 1_000:.3f}s behind"
+
+
 def _car_reference(value: str | None, player_car_index: int) -> int | str:
     if value is None:
         return player_car_index
@@ -195,7 +210,20 @@ def analyze_command(
             for lap in laps
             if lap["lap_time_ms"] and not lap.get("invalidated", False)
         ]
-    except (ValueError, KeyError, struct.error) as exc:
+        clean_laps = [lap for lap in valid_laps if lap.get("pit_status", 0) == 0]
+        analysis_laps = clean_laps or valid_laps
+        board = dataset.board()
+        rivals = [
+            row
+            for row in board
+            if row["car_idx"] != driver["car_idx"] and row["best_lap_ms"]
+        ]
+        best_rival = min(rivals, key=lambda row: row["best_lap_ms"]) if rivals else None
+        fuel = dataset.fuel_profile(reference)
+        ers = dataset.ers_usage(reference)
+        tyre_stints = dataset.tyre_strategy(reference)
+        pit_stops = dataset.pit_stops(reference)
+    except (OSError, ValueError, KeyError, struct.error) as exc:
         console.print(f"[bold red]✗ Could not analyze {filepath}:[/] {exc}")
         raise Exit(code=1)
 
@@ -205,9 +233,15 @@ def analyze_command(
     table.add_row("Driver", str(driver["name"]))
     table.add_row("Completed laps", str(len(laps)))
     table.add_row("Best lap", _format_lap_time(driver["best_lap_ms"]))
+    if best_rival:
+        table.add_row("Best rival", str(best_rival["name"]))
+        table.add_row(
+            "Gap to best rival",
+            _format_pace_gap(driver["best_lap_ms"] - best_rival["best_lap_ms"]),
+        )
 
-    if valid_laps:
-        lap_times = [lap["lap_time_ms"] for lap in valid_laps]
+    if analysis_laps:
+        lap_times = [lap["lap_time_ms"] for lap in analysis_laps]
         consistency = statistics.pstdev(lap_times) if len(lap_times) > 1 else 0
         table.add_row(
             "Average valid lap",
@@ -219,9 +253,22 @@ def analyze_command(
 
     invalidated = sum(1 for lap in laps if lap.get("invalidated", False))
     table.add_row("Invalidated laps", str(invalidated))
+    table.add_row("Pit stops", str(len(pit_stops)))
+    table.add_row("Tyre stints", str(len(tyre_stints)))
+    if fuel["consumption_kg_per_lap"] is not None:
+        table.add_row(
+            "Fuel consumption",
+            f"{fuel['consumption_kg_per_lap']:.3f} kg/lap",
+        )
+    if ers["store_energy_kj"] is not None:
+        table.add_row("ERS remaining", f"{ers['store_energy_kj']:.2f} kJ")
     console.print(Panel(table, title="[bold cyan]Session analysis[/]", box=box.ROUNDED))
 
     recommendations: list[str] = []
+    if len(analysis_laps) < 2:
+        recommendations.append(
+            "Complete at least two clean laps to make the consistency and sector advice reliable."
+        )
     if valid_laps:
         best_lap = min(valid_laps, key=lambda lap: lap["lap_time_ms"])
         sectors = dataset.sector_breakdown(reference, best_lap["lap"])
@@ -256,6 +303,32 @@ def analyze_command(
                 recommendations.append(
                     f"Work on sector {sector}: it is your biggest opportunity, worth about {gap / 1_000:.3f}s per lap."
                 )
+
+    if (
+        best_rival
+        and driver["best_lap_ms"]
+        and driver["best_lap_ms"] > best_rival["best_lap_ms"]
+    ):
+        recommendations.append(
+            f"Use {best_rival['name']}'s pace as a target: you are {_format_pace_gap(driver['best_lap_ms'] - best_rival['best_lap_ms'])}."
+        )
+    for compound, degradation in dataset.tyre_degradation(reference).items():
+        if len(degradation) >= 2:
+            first = degradation[0]["lap_time_ms"]
+            last = degradation[-1]["lap_time_ms"]
+            if last - first >= 1_000:
+                compound_name = next(
+                    (
+                        stint["compound_name"]
+                        for stint in tyre_stints
+                        if stint["compound"] == compound
+                    ),
+                    f"compound {compound}",
+                )
+                recommendations.append(
+                    f"Manage {compound_name} wear: lap times lose about {(last - first) / 1_000:.3f}s as the tyres age."
+                )
+                break
 
     if invalidated:
         recommendations.append(
