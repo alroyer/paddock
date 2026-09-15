@@ -247,7 +247,9 @@ def analyze_command(
             )
         if sector_gaps:
             console.print(
-                Panel(sector_table, title="[bold]Where time is lost[/]", box=box.ROUNDED)
+                Panel(
+                    sector_table, title="[bold]Where time is lost[/]", box=box.ROUNDED
+                )
             )
             sector, gap = sector_gaps[0]
             if gap >= 500:
@@ -270,7 +272,9 @@ def analyze_command(
 
     console.print(
         Panel(
-            "\n".join(f"[cyan]•[/] {recommendation}" for recommendation in recommendations),
+            "\n".join(
+                f"[cyan]•[/] {recommendation}" for recommendation in recommendations
+            ),
             title="[bold green]Improvement priorities[/]",
             box=box.ROUNDED,
         )
