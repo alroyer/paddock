@@ -46,7 +46,7 @@ class PacketMotionExData(BasePacket):
     @classmethod
     def parse(
         cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketMotionExData", bytes]:
+    ) -> tuple[PacketMotionExData, bytes]:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"

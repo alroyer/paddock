@@ -19,7 +19,7 @@ class LiveryColour:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "LiveryColour":
+    def from_bytes(cls, data: bytes) -> LiveryColour:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -52,7 +52,7 @@ class ParticipantData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "ParticipantData":
+    def from_bytes(cls, data: bytes) -> ParticipantData:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -142,7 +142,7 @@ class PacketParticipantsData(BasePacket):
     @classmethod
     def parse(
         cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketParticipantsData", bytes]:
+    ) -> tuple[PacketParticipantsData, bytes]:
         data = cls._require_bytes(data, 1 + 22 * ParticipantData.SIZE)
         offset = 0
         num_active = struct.unpack(_ENDIAN + "B", data[offset : offset + 1])[0]

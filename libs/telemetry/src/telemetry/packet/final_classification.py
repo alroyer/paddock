@@ -31,7 +31,7 @@ class FinalClassificationData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "FinalClassificationData":
+    def from_bytes(cls, data: bytes) -> FinalClassificationData:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -117,7 +117,7 @@ class PacketFinalClassificationData(BasePacket):
     @classmethod
     def parse(
         cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketFinalClassificationData", bytes]:
+    ) -> tuple[PacketFinalClassificationData, bytes]:
         data = cls._require_bytes(data, 1 + 22 * FinalClassificationData.SIZE)
         offset = 0
         num_cars = struct.unpack(_ENDIAN + "B", data[offset : offset + 1])[0]

@@ -26,7 +26,7 @@ class LobbyInfoData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "LobbyInfoData":
+    def from_bytes(cls, data: bytes) -> LobbyInfoData:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -89,7 +89,7 @@ class PacketLobbyInfoData(BasePacket):
     @classmethod
     def parse(
         cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketLobbyInfoData", bytes]:
+    ) -> tuple[PacketLobbyInfoData, bytes]:
         data = cls._require_bytes(data, 1 + 22 * LobbyInfoData.SIZE)
         offset = 0
         num_players = struct.unpack(_ENDIAN + "B", data[offset : offset + 1])[0]

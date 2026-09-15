@@ -39,7 +39,7 @@ class CarSetupData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "CarSetupData":
+    def from_bytes(cls, data: bytes) -> CarSetupData:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -136,7 +136,7 @@ class PacketCarSetupData(BasePacket):
     @classmethod
     def parse(
         cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketCarSetupData", bytes]:
+    ) -> tuple[PacketCarSetupData, bytes]:
         data = cls._require_bytes(data, 22 * CarSetupData.SIZE + 4)
         offset = 0
         car_setups = []

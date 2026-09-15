@@ -26,7 +26,7 @@ class PacketHeader:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def parse(cls, data: bytes) -> tuple["PacketHeader", bytes]:
+    def parse(cls, data: bytes) -> tuple[PacketHeader, bytes]:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"

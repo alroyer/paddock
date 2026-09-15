@@ -1,7 +1,5 @@
-from typing import TypeAlias
-
 #: A car can be referenced by its ``car_idx`` (0-21) or by driver name.
-CarRef: TypeAlias = int | str
+type CarRef = int | str
 
 
 class UnknownCar(ValueError):

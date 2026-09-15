@@ -16,7 +16,7 @@ class MarshalZone:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "MarshalZone":
+    def from_bytes(cls, data: bytes) -> MarshalZone:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -43,7 +43,7 @@ class WeatherForecastSample:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "WeatherForecastSample":
+    def from_bytes(cls, data: bytes) -> WeatherForecastSample:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -188,7 +188,7 @@ class PacketSessionData(BasePacket):
     @classmethod
     def parse(
         cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketSessionData", bytes]:
+    ) -> tuple[PacketSessionData, bytes]:
         data = cls._require_bytes(
             data,
             cls.PRE_SIZE

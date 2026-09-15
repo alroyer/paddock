@@ -1,13 +1,12 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any
 
 from .header import PacketHeader
 
-T = TypeVar("T", bound="BasePacket")
-
 
 @dataclass(frozen=True)
-class BasePacket(Generic[T]):
+class BasePacket[T]:
     header: PacketHeader
 
     @classmethod

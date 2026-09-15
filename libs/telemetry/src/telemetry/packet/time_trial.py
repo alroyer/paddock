@@ -28,7 +28,7 @@ class TimeTrialDataSet:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "TimeTrialDataSet":
+    def from_bytes(cls, data: bytes) -> TimeTrialDataSet:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -91,7 +91,7 @@ class PacketTimeTrialData(BasePacket):
     @classmethod
     def parse(
         cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketTimeTrialData", bytes]:
+    ) -> tuple[PacketTimeTrialData, bytes]:
         data = cls._require_bytes(data, TimeTrialDataSet.SIZE * 3)
 
         offset = 0

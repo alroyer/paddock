@@ -23,7 +23,7 @@ class PacketLapPositionsData(BasePacket):
     @classmethod
     def parse(
         cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketLapPositionsData", bytes]:
+    ) -> tuple[PacketLapPositionsData, bytes]:
         data = cls._require_bytes(data, 2 + MAX_LAPS * MAX_CARS)
 
         offset = 0

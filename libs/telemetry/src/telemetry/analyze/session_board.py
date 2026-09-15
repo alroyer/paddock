@@ -1,7 +1,7 @@
 """Session leaderboard: final classification or last-known positions."""
 
 from .index import Index
-from .laps import best_lap_ms, _completed_laps
+from .laps import _completed_laps, best_lap_ms
 
 
 def _name(index: Index, ci: int) -> str | None:

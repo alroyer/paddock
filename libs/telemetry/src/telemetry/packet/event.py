@@ -21,7 +21,7 @@ class EventDataDetails:
     SIZE: ClassVar[int] = 12
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "EventDataDetails":
+    def from_bytes(cls, data: bytes) -> EventDataDetails:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -32,7 +32,7 @@ class EventDataDetails:
         return self.raw.ljust(self.SIZE, b"\x00")
 
     @classmethod
-    def from_fastest_lap(cls, vehicle_idx: int, lap_time: float) -> "EventDataDetails":
+    def from_fastest_lap(cls, vehicle_idx: int, lap_time: float) -> EventDataDetails:
         packed = struct.pack(_ENDIAN + "Bf", vehicle_idx, lap_time)
         return cls(raw=packed)
 
@@ -41,7 +41,7 @@ class EventDataDetails:
         return vehicle_idx, lap_time
 
     @classmethod
-    def from_retirement(cls, vehicle_idx: int, reason: int) -> "EventDataDetails":
+    def from_retirement(cls, vehicle_idx: int, reason: int) -> EventDataDetails:
         packed = struct.pack(_ENDIAN + "BB", vehicle_idx, reason)
         return cls(raw=packed)
 
@@ -58,7 +58,7 @@ class EventDataDetails:
         is_driver: int,
         fastest_vehicle_idx: int,
         fastest_speed: float,
-    ) -> "EventDataDetails":
+    ) -> EventDataDetails:
         packed = struct.pack(
             _ENDIAN + "BfBBBf",
             vehicle_idx,
@@ -91,7 +91,7 @@ class EventDataDetails:
     @classmethod
     def from_flashback(
         cls, frame_identifier: int, session_time: float
-    ) -> "EventDataDetails":
+    ) -> EventDataDetails:
         packed = struct.pack(_ENDIAN + "If", frame_identifier, session_time)
         return cls(raw=packed)
 
@@ -108,9 +108,7 @@ class PacketEventData(BasePacket):
     SIZE: ClassVar[int] = PacketHeader.SIZE + 4 + EventDataDetails.SIZE
 
     @classmethod
-    def parse(
-        cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketEventData", bytes]:
+    def parse(cls, header: PacketHeader, data: bytes) -> tuple[PacketEventData, bytes]:
         payload = cls._require_bytes(data, EventDataDetails.SIZE + 4)
         event_string_code, payload = cls._take_bytes(payload, 4)
         event_details_bytes, remaining = cls._take_bytes(payload, EventDataDetails.SIZE)
@@ -137,7 +135,7 @@ class PacketEventData(BasePacket):
         if isinstance(raw_code, (bytes, bytearray)):
             try:
                 code_str = raw_code.decode("ascii")
-            except Exception:
+            except UnicodeDecodeError:
                 return "Unknown"
         else:
             code_str = cast(str, raw_code)

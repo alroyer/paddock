@@ -24,7 +24,7 @@ class LapHistoryData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "LapHistoryData":
+    def from_bytes(cls, data: bytes) -> LapHistoryData:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -74,7 +74,7 @@ class TyreStintHistoryData:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "TyreStintHistoryData":
+    def from_bytes(cls, data: bytes) -> TyreStintHistoryData:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"
@@ -119,7 +119,7 @@ class PacketSessionHistoryData(BasePacket):
     @classmethod
     def parse(
         cls, header: PacketHeader, data: bytes
-    ) -> tuple["PacketSessionHistoryData", bytes]:
+    ) -> tuple[PacketSessionHistoryData, bytes]:
         data = cls._require_bytes(
             data, 7 + 100 * LapHistoryData.SIZE + 8 * TyreStintHistoryData.SIZE
         )
