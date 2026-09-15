@@ -64,16 +64,24 @@ class TelemetryDataset:
 
     def laps(self, ref: CarRef, limit: int | None = None) -> list[dict]:
         """Validated laps, oldest first (lap 1 = first completed lap)."""
+        if limit is not None and limit < 0:
+            raise ValueError("limit must be non-negative")
         ci = resolve_car(self._index, ref)
         laps = laps_mod.lap_summaries(self._index, ci)
-        return laps[-limit:] if limit else laps
+        return laps[-limit:] if limit else ([] if limit == 0 else laps)
 
     def best_laps(self, ref: CarRef, limit: int = 3) -> list[dict]:
+        if limit < 0:
+            raise ValueError("limit must be non-negative")
         ci = resolve_car(self._index, ref)
         laps = [
             lap
             for lap in self.laps(ci)
-            if lap["lap_time_ms"] and lap["lap_time_ms"] > 0
+            if (
+                not lap.get("invalidated", False)
+                and lap["lap_time_ms"]
+                and lap["lap_time_ms"] > 0
+            )
         ]
         laps.sort(key=lambda lap: lap["lap_time_ms"])
         return laps[:limit]

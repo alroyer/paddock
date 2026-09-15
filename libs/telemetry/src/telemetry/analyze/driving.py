@@ -14,6 +14,8 @@ def _telemetry_samples(index: Index, ci: int) -> list:
 
 def speed_trace(index: Index, ci: int, max_points: int = 240) -> list:
     """Downsampled (t, speed_kmh) points for the whole session."""
+    if max_points < 1:
+        raise ValueError("max_points must be at least 1")
     samples = _telemetry_samples(index, ci)
     if not samples:
         return []

@@ -21,7 +21,7 @@ def resolve_car(index: Index, ref: int | str) -> int:
         raise UnknownCar("empty car name")
 
     for packet in index.participants:
-        for ci, participant in enumerate(packet.participants):
+        for ci, participant in enumerate(packet.participants[: index.n_cars]):
             if participant.name.casefold() == name:
                 return ci
 
@@ -29,7 +29,7 @@ def resolve_car(index: Index, ref: int | str) -> int:
 
 
 def _car_active(index: Index, car_idx: int) -> bool:
-    return car_idx < index.n_cars
+    return 0 <= car_idx < index.n_cars
 
 
 def _known_names(index: Index) -> str:

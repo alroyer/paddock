@@ -17,6 +17,10 @@ def load_telemetry(path: str | Path) -> list[BasePacket]:
     packets: list[BasePacket] = []
     while len(data) > 0:
         header, data = PacketHeader.parse(data)
-        packet, data = PACKET_PARSERS[header.packet_id](header, data)
+        try:
+            parser = PACKET_PARSERS[header.packet_id]
+        except KeyError as exc:
+            raise ValueError(f"unsupported packet_id: {header.packet_id}") from exc
+        packet, data = parser(header, data)
         packets.append(packet)
     return packets

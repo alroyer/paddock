@@ -1,7 +1,6 @@
-import sys
 from enum import IntEnum
 
-BYTES_ORDER = sys.byteorder
+BYTES_ORDER = "little"
 
 
 class PacketId(IntEnum):

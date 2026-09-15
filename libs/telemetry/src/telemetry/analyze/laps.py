@@ -73,12 +73,10 @@ def sector_breakdown(index: Index, ci: int, lap: int) -> dict:
 
 def _best_sectors(index: Index, ci: int) -> list[int | None]:
     best: list[int | None] = [None, None]
-    for pkt in index.cars[ci].lap_data:
-        ld = pkt.lap_data[ci]
-        sectors = [
-            _time_ms(ld.sector1_time_ms_part, ld.sector1_time_minutes_part),
-            _time_ms(ld.sector2_time_ms_part, ld.sector2_time_minutes_part),
-        ]
+    for lap in _completed_laps(index, ci):
+        if lap["invalidated"]:
+            continue
+        sectors = lap["sectors_ms"]
         for i, s in enumerate(sectors):
             if s and (best[i] is None or s < best[i]):
                 best[i] = s

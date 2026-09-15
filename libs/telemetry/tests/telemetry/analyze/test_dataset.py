@@ -126,7 +126,15 @@ def test_laps_applies_limit_to_the_latest_laps(monkeypatch):
     )
 
     assert dataset.laps("Alice", limit=2) == [{"lap": 2}, {"lap": 3}]
+    assert dataset.laps("Alice", limit=0) == []
     assert dataset.laps("Alice") is source_laps
+
+
+def test_laps_rejects_negative_limit():
+    dataset = make_dataset()
+
+    with pytest.raises(ValueError, match="limit must be non-negative"):
+        dataset.laps("Alice", limit=-1)
 
 
 def test_best_laps_filters_nonpositive_times_sorts_and_limits(monkeypatch):
@@ -144,6 +152,23 @@ def test_best_laps_filters_nonpositive_times_sorts_and_limits(monkeypatch):
     )
 
     assert dataset.best_laps("Alice", limit=1) == [{"lap": 4, "lap_time_ms": 91000}]
+
+
+def test_best_laps_excludes_invalidated_laps(monkeypatch):
+    dataset = make_dataset()
+    monkeypatch.setattr(dataset_mod, "resolve_car", lambda index, ref: 0)
+    monkeypatch.setattr(
+        TelemetryDataset,
+        "laps",
+        lambda self, ref: [
+            {"lap": 1, "lap_time_ms": 80000, "invalidated": True},
+            {"lap": 2, "lap_time_ms": 90000, "invalidated": False},
+        ],
+    )
+
+    assert dataset.best_laps("Alice") == [
+        {"lap": 2, "lap_time_ms": 90000, "invalidated": False}
+    ]
 
 
 @pytest.mark.parametrize(

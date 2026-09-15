@@ -58,6 +58,16 @@ def test_resolve_car_matches_driver_names_case_insensitively_and_trimmed():
     assert resolve_car(index, "MAX VERSTAPPEN") == 1
 
 
+def test_resolve_car_rejects_inactive_driver_name():
+    index = index_with(
+        n_cars=2,
+        participant_packets=[participant_packet("Alice", "Bob", "Charlie")],
+    )
+
+    with pytest.raises(UnknownCar, match="unknown driver 'Charlie'"):
+        resolve_car(index, "Charlie")
+
+
 def test_resolve_car_rejects_empty_and_unknown_names():
     index = index_with(participant_packets=[participant_packet("Alice")])
 

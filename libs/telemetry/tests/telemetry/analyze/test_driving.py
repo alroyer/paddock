@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 from typing import cast
 
+import pytest
 from telemetry.analyze.driving import (
     _telemetry_samples,
     gear_usage,
@@ -63,6 +64,12 @@ def test_speed_trace_downsamples_evenly_and_keeps_first_and_last_points():
 
 def test_speed_trace_returns_empty_for_missing_telemetry():
     assert speed_trace(index_with(), 0) == []
+
+
+@pytest.mark.parametrize("max_points", [0, -1])
+def test_speed_trace_rejects_nonpositive_max_points(max_points):
+    with pytest.raises(ValueError, match="max_points must be at least 1"):
+        speed_trace(index_with([telemetry_packet(1.0, 100, 3)]), 0, max_points)
 
 
 def test_gear_usage_ignores_neutral_and_sorts_gears_with_shares():

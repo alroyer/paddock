@@ -95,6 +95,18 @@ def build_index(packets: list[BasePacket]) -> Index:
         ):
             final_classification = packet
 
+    for car_index in cars.values():
+        for packet_list in (
+            car_index.motion,
+            car_index.car_telemetry,
+            car_index.car_status,
+            car_index.lap_data,
+            car_index.tyre_sets,
+        ):
+            packet_list.sort(key=lambda packet: packet.header.session_time)
+    events.sort(key=lambda packet: packet.header.session_time)
+    participants.sort(key=lambda packet: packet.header.session_time)
+
     first = packets[0]
     t_times = [p.header.session_time for p in packets]
     n_cars = max(len(cars), 1)

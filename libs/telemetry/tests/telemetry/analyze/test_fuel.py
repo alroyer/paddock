@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 from typing import cast
 
+import pytest
 from telemetry.analyze import fuel as fuel_mod
 from telemetry.analyze.fuel import _fuel_samples, fuel_profile
 from telemetry.analyze.index import Index
@@ -36,6 +37,12 @@ def test_fuel_profile_returns_empty_values_without_status_samples():
         "capacity_kg": None,
         "consumption_kg_per_lap": None,
     }
+
+
+@pytest.mark.parametrize("max_points", [0, -1])
+def test_fuel_profile_rejects_nonpositive_max_points(max_points):
+    with pytest.raises(ValueError, match="max_points must be at least 1"):
+        fuel_profile(index_with([status_packet(1.0, 42.5, 110.0)]), 0, max_points)
 
 
 def test_fuel_profile_rounds_values_and_calculates_consumption_per_lap(

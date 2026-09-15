@@ -21,6 +21,8 @@ def fuel_profile(index: Index, ci: int, max_points: int = 240) -> dict:
     - ``capacity_kg``: nominal tank capacity
     - ``consumption_kg_per_lap``: total drop divided by laps elapsed
     """
+    if max_points < 1:
+        raise ValueError("max_points must be at least 1")
     samples = _fuel_samples(index, ci)
     if not samples:
         return {
