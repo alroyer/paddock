@@ -1,4 +1,5 @@
 import queue
+import statistics
 import struct
 import threading
 from pathlib import Path
@@ -7,9 +8,7 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from telemetry.filters import filter_packets
-from telemetry.loader import load_telemetry
-from telemetry.packet import PacketId
+from telemetry.analyze import TelemetryDataset
 from typer import Argument, Exit, Option, Typer
 
 from .config import (
@@ -159,24 +158,123 @@ def _consume_recorder_events(event_queue: queue.Queue[RecorderEvent]) -> None:
             return
 
 
-@app.command(name="view")
-def view_command(
-    filepath: Path = Argument(..., help="Path to the telemetry .bin file"),
-    packet_id: PacketId | None = Option(None, help="Only keep packets of this type"),
-) -> None:
-    """Load a telemetry .bin file and inspect its packets."""
-    try:
-        packets = load_telemetry(filepath)
-    except (ValueError, struct.error) as exc:
-        console.print(f"[bold red]✗ Could not parse {filepath}:[/] {exc}")
-        raise Exit(code=1)
-    console.print(f"Loaded [bold]{len(packets):,}[/] packets")
+def _format_lap_time(milliseconds: int | None) -> str:
+    if not milliseconds or milliseconds < 1:
+        return "—"
+    minutes, remainder = divmod(milliseconds, 60_000)
+    seconds, millis = divmod(remainder, 1_000)
+    return f"{minutes}:{seconds:02d}.{millis:03d}"
 
-    if packet_id is not None:
-        filtered_packets = filter_packets(packets, packet_id=packet_id)
-        console.print(
-            f"Found [bold]{len(filtered_packets):,}[/] [cyan]{packet_id.name}[/] packets"
+
+def _car_reference(value: str | None, player_car_index: int) -> int | str:
+    if value is None:
+        return player_car_index
+    try:
+        return int(value)
+    except ValueError:
+        return value
+
+
+@app.command(name="analyze")
+def analyze_command(
+    filepath: Path = Argument(..., help="Path to the telemetry .bin file"),
+    car: str | None = Option(
+        None,
+        "--car",
+        help="Car index or driver name (defaults to the player)",
+    ),
+) -> None:
+    """Analyze a driver's session and suggest ways to improve."""
+    try:
+        dataset = TelemetryDataset.from_file(filepath)
+        reference = _car_reference(car, dataset.index.player_car_index)
+        driver = dataset.car(reference)
+        laps = dataset.laps(reference)
+        valid_laps = [
+            lap
+            for lap in laps
+            if lap["lap_time_ms"] and not lap.get("invalidated", False)
+        ]
+    except (ValueError, KeyError, struct.error) as exc:
+        console.print(f"[bold red]✗ Could not analyze {filepath}:[/] {exc}")
+        raise Exit(code=1)
+
+    table = Table(box=None, padding=(0, 2))
+    table.add_column(style="grey58", justify="right")
+    table.add_column()
+    table.add_row("Driver", str(driver["name"]))
+    table.add_row("Completed laps", str(len(laps)))
+    table.add_row("Best lap", _format_lap_time(driver["best_lap_ms"]))
+
+    if valid_laps:
+        lap_times = [lap["lap_time_ms"] for lap in valid_laps]
+        consistency = statistics.pstdev(lap_times) if len(lap_times) > 1 else 0
+        table.add_row(
+            "Average valid lap",
+            _format_lap_time(round(statistics.mean(lap_times))),
         )
+        table.add_row("Consistency", f"±{consistency / 1_000:.3f}s")
+    else:
+        consistency = None
+
+    invalidated = sum(1 for lap in laps if lap.get("invalidated", False))
+    table.add_row("Invalidated laps", str(invalidated))
+    console.print(Panel(table, title="[bold cyan]Session analysis[/]", box=box.ROUNDED))
+
+    recommendations: list[str] = []
+    if valid_laps:
+        best_lap = min(valid_laps, key=lambda lap: lap["lap_time_ms"])
+        sectors = dataset.sector_breakdown(reference, best_lap["lap"])
+        sector_gaps = [
+            (index + 1, sector - best)
+            for index, (sector, best) in enumerate(
+                zip(sectors["sectors_ms"], sectors["best_sector_ms"])
+            )
+            if sector and best
+        ]
+        sector_gaps.sort(key=lambda item: item[1], reverse=True)
+        sector_table = Table(box=None, padding=(0, 2))
+        sector_table.add_column("Sector", style="grey58")
+        sector_table.add_column("Best lap")
+        sector_table.add_column("Session best")
+        sector_table.add_column("Potential")
+        for sector, gap in sector_gaps:
+            sector_table.add_row(
+                str(sector),
+                _format_lap_time(sectors["sectors_ms"][sector - 1]),
+                _format_lap_time(sectors["best_sector_ms"][sector - 1]),
+                f"+{gap / 1_000:.3f}s",
+            )
+        if sector_gaps:
+            console.print(
+                Panel(sector_table, title="[bold]Where time is lost[/]", box=box.ROUNDED)
+            )
+            sector, gap = sector_gaps[0]
+            if gap >= 500:
+                recommendations.append(
+                    f"Work on sector {sector}: it is your biggest opportunity, worth about {gap / 1_000:.3f}s per lap."
+                )
+
+    if invalidated:
+        recommendations.append(
+            f"Stay within track limits: {invalidated} invalidated lap(s) removed usable practice data."
+        )
+    if consistency is not None and consistency >= 1_000:
+        recommendations.append(
+            f"Focus on consistency: your valid laps vary by ±{consistency / 1_000:.3f}s."
+        )
+    if not recommendations:
+        recommendations.append(
+            "Keep working on consistency and bring each sector closer to its best performance."
+        )
+
+    console.print(
+        Panel(
+            "\n".join(f"[cyan]•[/] {recommendation}" for recommendation in recommendations),
+            title="[bold green]Improvement priorities[/]",
+            box=box.ROUNDED,
+        )
+    )
 
 
 if __name__ == "__main__":
