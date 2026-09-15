@@ -1,6 +1,7 @@
 """Fuel analysis: load, consumption and range from car status samples."""
 
 from .index import Index
+from .laps import lap_summaries
 
 
 def _fuel_samples(index: Index, ci: int) -> list[tuple[float, float, float]]:
@@ -41,8 +42,6 @@ def fuel_profile(index: Index, ci: int, max_points: int = 240) -> dict:
     drop = start_kg - end_kg
 
     consumption = None
-    from .laps import lap_summaries
-
     laps = lap_summaries(index, ci)
     if laps and drop > 0:
         consumption = round(drop / len(laps), 3)

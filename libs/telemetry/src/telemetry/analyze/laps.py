@@ -21,29 +21,25 @@ def _completed_laps(index: Index, ci: int) -> list[dict]:
             "t_session": pkt.header.session_time,
             "lap_time_ms": ld.last_lap_time_in_ms,
             "sectors_ms": [
-                _sector_ms(ld.sector1_time_ms_part, ld.sector1_time_minutes_part),
-                _sector_ms(ld.sector2_time_ms_part, ld.sector2_time_minutes_part),
+                _time_ms(ld.sector1_time_ms_part, ld.sector1_time_minutes_part),
+                _time_ms(ld.sector2_time_ms_part, ld.sector2_time_minutes_part),
             ],
             "position": ld.car_position,
             "grid_position": ld.grid_position,
             "pit_status": ld.pit_status,
             "num_pit_stops": ld.num_pit_stops,
             "invalidated": bool(ld.current_lap_invalid),
-            "delta_to_car_in_front_ms": _delta_ms(
+            "delta_to_car_in_front_ms": _time_ms(
                 ld.delta_to_car_in_front_ms_part, ld.delta_to_car_in_front_minutes_part
             ),
-            "delta_to_leader_ms": _delta_ms(
+            "delta_to_leader_ms": _time_ms(
                 ld.delta_to_race_leader_ms_part, ld.delta_to_race_leader_minutes_part
             ),
         }
     return [by_lap[k] for k in sorted(by_lap)]
 
 
-def _delta_ms(ms_part: int, minutes_part: int) -> int:
-    return ms_part + minutes_part * 60_000
-
-
-def _sector_ms(ms_part: int, minutes_part: int) -> int:
+def _time_ms(ms_part: int, minutes_part: int) -> int:
     return ms_part + minutes_part * 60_000
 
 
@@ -69,7 +65,7 @@ def sector_breakdown(index: Index, ci: int, lap: int) -> dict:
         "lap": lap,
         "sectors_ms": sectors,
         "best_sector_ms": [
-            sectors[i] if i < len(sectors) else None for i in range(len(sectors))
+            best[i] if best[i] is not None else None for i in range(len(sectors))
         ],
         "session_best_ms": best,
     }
@@ -80,8 +76,8 @@ def _best_sectors(index: Index, ci: int) -> list[int | None]:
     for pkt in index.cars[ci].lap_data:
         ld = pkt.lap_data[ci]
         sectors = [
-            _sector_ms(ld.sector1_time_ms_part, ld.sector1_time_minutes_part),
-            _sector_ms(ld.sector2_time_ms_part, ld.sector2_time_minutes_part),
+            _time_ms(ld.sector1_time_ms_part, ld.sector1_time_minutes_part),
+            _time_ms(ld.sector2_time_ms_part, ld.sector2_time_minutes_part),
         ]
         for i, s in enumerate(sectors):
             if s and (best[i] is None or s < best[i]):

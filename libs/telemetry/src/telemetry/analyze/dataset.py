@@ -4,7 +4,8 @@ from pathlib import Path
 
 from ..loader import load_telemetry
 from ..packet import BasePacket
-from . import driving, ers, fuel, laps as laps_mod, strategy, tyres
+from . import driving, ers, fuel, strategy, tyres
+from . import laps as laps_mod
 from .index import Index, build_index
 from .refs import resolve_car
 from .session_board import session_board
@@ -64,7 +65,7 @@ class TelemetryDataset:
     def laps(self, ref: CarRef, limit: int | None = None) -> list[dict]:
         """Validated laps, oldest first (lap 1 = first completed lap)."""
         ci = resolve_car(self._index, ref)
-        laps = lap_summaries(self._index, ci)
+        laps = laps_mod.lap_summaries(self._index, ci)
         return laps[-limit:] if limit else laps
 
     def best_laps(self, ref: CarRef, limit: int = 3) -> list[dict]:
@@ -76,6 +77,60 @@ class TelemetryDataset:
         ]
         laps.sort(key=lambda lap: lap["lap_time_ms"])
         return laps[:limit]
+
+    def board(self) -> list[dict]:
+        """Session board: final classification, or last-known positions."""
+        return session_board(self._index)
+
+    def sector_breakdown(self, ref: CarRef, lap: int) -> dict:
+        """Sectors of one lap against the session best per sector."""
+        ci = resolve_car(self._index, ref)
+        return laps_mod.sector_breakdown(self._index, ci, lap)
+
+    def compare_laps(self, ref: CarRef, lap_a: int, lap_b: int) -> dict:
+        """Lap A vs lap B: time and per-sector differences."""
+        ci = resolve_car(self._index, ref)
+        return laps_mod.compare_laps(self._index, ci, lap_a, lap_b)
+
+    def speed_trace(self, ref: CarRef, max_points: int = 240) -> list:
+        """Downsampled (t, speed_kmh) points for the whole session."""
+        ci = resolve_car(self._index, ref)
+        return driving.speed_trace(self._index, ci, max_points)
+
+    def gear_usage(self, ref: CarRef) -> list:
+        """Gear usage histogram: [{gear, samples, share}, ...]."""
+        ci = resolve_car(self._index, ref)
+        return driving.gear_usage(self._index, ci)
+
+    def fuel_profile(self, ref: CarRef, max_points: int = 240) -> dict:
+        """Fuel load over time + derived consumption stats."""
+        ci = resolve_car(self._index, ref)
+        return fuel.fuel_profile(self._index, ci, max_points)
+
+    def ers_usage(self, ref: CarRef) -> dict:
+        """ERS store level and last-lap harvest/deploy totals."""
+        ci = resolve_car(self._index, ref)
+        return ers.ers_usage(self._index, ci)
+
+    def tyre_strategy(self, ref: CarRef) -> list[dict]:
+        """Tyre stints of the session, in order."""
+        ci = resolve_car(self._index, ref)
+        return tyres.tyre_strategy(self._index, ci)
+
+    def tyre_degradation(self, ref: CarRef) -> dict:
+        """Lap time vs tyre age, grouped by compound."""
+        ci = resolve_car(self._index, ref)
+        return tyres.tyre_degradation(self._index, ci)
+
+    def pit_stops(self, ref: CarRef) -> list[dict]:
+        """Pit stops of the session, in lap order."""
+        ci = resolve_car(self._index, ref)
+        return strategy.pit_stops(self._index, ci)
+
+    def position_changes(self, ref: CarRef) -> list[dict]:
+        """Laps where the car changed position, with the delta."""
+        ci = resolve_car(self._index, ref)
+        return strategy.position_changes(self._index, ci)
 
     def _name(self, ci: int) -> str | None:
         for packet in self._index.participants:
