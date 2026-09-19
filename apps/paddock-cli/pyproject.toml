@@ -5,6 +5,7 @@ description = "CLI for recording and viewing F1 telemetry data"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "pydantic-ai>=2.45.0",
     "telemetry",
     "typer>=0.26.7",
 ]

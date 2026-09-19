@@ -8,16 +8,29 @@
             "type": "debugpy",
             "request": "launch",
             "module": "paddock_cli.main",
-            "args": ["record"],
+            "args": [
+                "record"
+            ],
             "console": "integratedTerminal",
         },
         {
-            "name": "paddock-cli view",
+            "name": "paddock-cli analyze",
             "type": "debugpy",
             "request": "launch",
             "module": "paddock_cli.main",
-            "args": ["view", "./data/telemetry_data_2026-07-21_10-22-44.bin"],
+            "args": [
+                "analyze",
+                "${input:telemetryFilePath}"
+            ],
             "console": "integratedTerminal",
+        }
+    ],
+    "inputs": [
+        {
+            "id": "telemetryFilePath",
+            "type": "promptString",
+            "default": "",
+            "description": "Enter the path to the telemetry file",
         }
     ]
 }
