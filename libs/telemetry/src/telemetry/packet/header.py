@@ -1,6 +1,6 @@
 import struct
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, overload
 
 from .constants import BYTES_ORDER
 
@@ -26,7 +26,15 @@ class PacketHeader:
     SIZE: ClassVar[int] = struct.calcsize(STRUCT_FMT)
 
     @classmethod
-    def parse(cls, data: bytes) -> tuple[PacketHeader, bytes]:
+    @overload
+    def parse(cls, data: bytes) -> tuple[PacketHeader, bytes]: ...
+
+    @classmethod
+    @overload
+    def parse(cls, data: memoryview) -> tuple[PacketHeader, memoryview]: ...
+
+    @classmethod
+    def parse(cls, data: bytes | memoryview) -> tuple[PacketHeader, bytes | memoryview]:
         if len(data) < cls.SIZE:
             raise ValueError(
                 f"buffer too small: need {cls.SIZE} bytes, got {len(data)}"

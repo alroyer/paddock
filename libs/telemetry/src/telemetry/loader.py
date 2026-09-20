@@ -21,6 +21,6 @@ def load_telemetry(path: str | Path) -> list[BasePacket]:
             parser = PACKET_PARSERS[header.packet_id]
         except KeyError as exc:
             raise ValueError(f"unsupported packet_id: {header.packet_id}") from exc
-        packet, data = parser(header, data)
+        packet, data = parser(header, bytes(data))
         packets.append(packet)
     return packets
