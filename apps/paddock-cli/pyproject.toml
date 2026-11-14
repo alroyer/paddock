@@ -1,17 +1,21 @@
 [project]
 name = "paddock-cli"
 version = "0.1.0"
-description = "CLI for recording and viewing F1 telemetry data"
+description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 dependencies = [
-    "pydantic-ai>=2.45.0",
-    "telemetry",
-    "typer>=0.26.7",
+    "python-dotenv>=1.2.4",
+    "telemetrylib",
+    "typer>=0.27.3",
 ]
 
 [project.scripts]
 paddock-cli = "paddock_cli.main:app"
 
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
+
 [tool.uv.sources]
-telemetry = { workspace = true }
+telemetrylib = { workspace = true }

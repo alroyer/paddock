@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telemetrylib"
+version = "0.1.0"
+description = "Python data structures for F1 26 UDP telemetry data"
+readme = "README.md"
+requires-python = ">=3.15"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "dataclasses; python_version<'3.15'",
+]

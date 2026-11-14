@@ -1,27 +1,27 @@
 [project]
 name = "paddock"
 version = "0.1.0"
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 dependencies = [
     "paddock-cli",
-]
-
-[dependency-groups]
-dev = [
-    "pytest>=9.1.0",
-    "ruff>=0.15.17",
-    "ty>=0.0.50",
+    "telemetrylib",
 ]
 
 [tool.uv.workspace]
 members = [
     "apps/paddock-cli",
-    "libs/telemetry",
+    "libs/telemetrylib",
 ]
 
 [tool.uv.sources]
 paddock-cli = { workspace = true }
+telemetrylib = { workspace = true }
 
-[tool.ruff.lint]
-ignore = ["B008"]
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.17.2",
+]
 
+[tool.ruff]
+line-length = 120
