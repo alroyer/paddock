@@ -25,13 +25,13 @@ class TelemetryRecorder:
     """Bind a UDP socket and append every received datagram to a .bin file."""
 
     def __init__(self, host: str, port: int, data_dir: Path) -> None:
-        self.host = host
-        self.port = port
-        self.data_dir = data_dir
-        self.output_path: Path | None = None
-        self.stats = RecordingStats()
+        self._host = host
+        self._port = port
+        self._data_dir = data_dir
+        self._output_path: Path | None = None
         self._socket: socket.socket | None = None
         self._file: IO[bytes] | None = None
+        self._stats = RecordingStats()
 
     @property
     def address(self) -> tuple[str, int]:
@@ -41,22 +41,32 @@ class TelemetryRecorder:
         host, port = self._socket.getsockname()
         return host, port
 
+    @property
+    def output_path(self) -> Path | None:
+        """The path to the output file; None if the recorder has not been started."""
+        return self._output_path
+
+    @property
+    def stats(self) -> RecordingStats:
+        """The number of packets and bytes recorded so far."""
+        return self._stats
+
     def start(self) -> Path:
         """Bind the socket, create the output file and return its path."""
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             self._socket.settimeout(RECEIVE_TIMEOUT)
-            self._socket.bind((self.host, self.port))
+            self._socket.bind((self._host, self._port))
         except OSError:
             self._socket.close()
             self._socket = None
             raise
 
-        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self._data_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now(UTC).strftime("%Y-%m-%d_%H-%M-%S")
-        self.output_path = self.data_dir / f"telemetry_{timestamp}.bin"
-        self._file = self.output_path.open("wb")
-        return self.output_path
+        self._output_path = self._data_dir / f"telemetry_{timestamp}.bin"
+        self._file = self._output_path.open("wb")
+        return self._output_path
 
     def record_one(self) -> int | None:
         """Receive one datagram and append it to the file.
