@@ -2,7 +2,7 @@
 # import struct
 
 # import pytest
-# from telemetrylib import (
+# from telemetry import (
 #     DriverId,
 #     InvalidPacketLengthError,
 #     NationalityId,
@@ -16,8 +16,8 @@
 #     UnsupportedPacketFormatError,
 #     decode_packet,
 # )
-# from telemetrylib.reader import PACKET_SCHEMAS
-# from telemetrylib.schemas import SCHEMAS
+# from telemetry.reader import PACKET_SCHEMAS
+# from telemetry.schemas import SCHEMAS
 
 # HEADER_FORMAT = struct.Struct("<HBBBBBQfIIBB")
 # PACKET_SIZES = {

@@ -5,18 +5,18 @@ license = "Apache-2.0"
 requires-python = ">=3.15"
 dependencies = [
     "paddock-cli",
-    "telemetrylib",
+    "telemetry",
 ]
 
 [tool.uv.workspace]
 members = [
     "apps/paddock-cli",
-    "libs/telemetrylib",
+    "libs/telemetry",
 ]
 
 [tool.uv.sources]
 paddock-cli = { workspace = true }
-telemetrylib = { workspace = true }
+telemetry = { workspace = true }
 
 [dependency-groups]
 dev = [

@@ -1,4 +1,4 @@
-# telemetrylib
+# telemetry
 
 Python data structures for F1 26 UDP telemetry data.
 
@@ -14,7 +14,7 @@ uv pip install .
 ## Usage
 
 ```python
-from telemetrylib import (
+from telemetry import (
     PacketHeader,
     PacketSessionData,
     PacketLapData,
@@ -47,7 +47,7 @@ session_data = PacketSessionData(
 UDP socket to port `20777` by default and decodes each received datagram:
 
 ```python
-from telemetrylib import PacketId, TelemetryReceiver
+from telemetry import PacketId, TelemetryReceiver
 
 with TelemetryReceiver() as receiver:
     packet = receiver.receive()
@@ -91,4 +91,4 @@ This library provides Python dataclasses that mirror the C++ structures in the F
 
 ## License
 
-MIT
+Apache-2.0
